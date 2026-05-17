@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>CertGen</title>
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="css/main.css">
+	</head>
+	<body>
+		<header>
+			<div class="wordmark">CertGen</div>
+			<div class="gold-rule"></div>
+		</header>
+
+		<div id="step-indicator">
+			<div class="indicator-line">
+				<div class="marker active"><span>Template</span></div>
+				<div class="marker"><span>Placement</span></div>
+				<div class="marker"><span>Names</span></div>
+				<div class="marker"><span>Style</span></div>
+				<div class="marker"><span>Generate</span></div>
+			</div>
+		</div>
+
+		<main>
+			<section id="step-1" class="step">
+				<div class="step-number">1</div>
+				<div class="card">
+					<h2>Upload Template</h2>
+					<div id="template-drop-zone" class="upload-zone">Click or drop an image here (JPEG or PNG)</div>
+					<input id="template-input" type="file" accept="image/jpeg,image/png" style="display:none" />
+					<div id="template-info" class="info" style="display:none"></div>
+					<div class="actions"><button class="btn" id="to-step-2">Next: Placement</button></div>
+				</div>
+			</section>
+
+			<section id="step-2" class="step" style="display:none">
+				<div class="step-number">2</div>
+				<div class="card">
+					<h2>Place the Name</h2>
+					<div id="canvas-wrapper">
+						<img id="template-preview" src="#" alt="Template preview" />
+						<div id="name-tag">Full Name</div>
+					</div>
+					<div id="position-display">X: 50.0%  Y: 58.0%</div>
+					<div class="actions"><button class="btn" id="to-step-3">Next: Names</button></div>
+				</div>
+			</section>
+
+			<section id="step-3" class="step" style="display:none">
+				<div class="step-number">3</div>
+				<div class="card">
+					<h2>Upload Names</h2>
+					<div id="spreadsheet-drop-zone" class="upload-zone">Click or drop a CSV or XLSX file here</div>
+					<input id="spreadsheet-input" type="file" accept=".csv,.xlsx" style="display:none" />
+					<div id="spreadsheet-info" class="info" style="display:none">
+						<div id="row-count"></div>
+						<label class="label">Column</label>
+						<select id="column-select"></select>
+						<div id="preview-table-wrap">
+							<table id="preview-table"></table>
+						</div>
+					</div>
+					<div class="actions"><button class="btn" id="to-step-4">Next: Style</button></div>
+				</div>
+			</section>
+
+			<section id="step-4" class="step" style="display:none">
+				<div class="step-number">4</div>
+				<div class="card">
+					<h2>Style</h2>
+					<div class="controls-row">
+						<div class="control">
+							<label class="label">Font</label>
+							<select id="font-select">
+								<option value="cinzel_bold">Cinzel Bold</option>
+								<option value="cinzel_regular">Cinzel Regular</option>
+								<option value="playfair_bold">Playfair Bold</option>
+								<option value="playfair_regular">Playfair Regular</option>
+								<option value="montserrat_bold">Montserrat Bold</option>
+								<option value="montserrat_regular">Montserrat Regular</option>
+								<option value="lato_bold">Lato Bold</option>
+								<option value="lato_regular">Lato Regular</option>
+								<option value="raleway_bold">Raleway Bold</option>
+								<option value="opensans_bold">OpenSans Bold</option>
+							</select>
+						</div>
+						<div class="control">
+							<label class="label">Size</label>
+							<div class="range-wrap">
+								<input id="font-size-slider" type="range" min="24" max="100" value="64" />
+								<span id="font-size-value">64</span>
+							</div>
+						</div>
+						<div class="control">
+							<label class="label">Color</label>
+							<input id="font-color-picker" type="color" value="#C9A84C" />
+						</div>
+					</div>
+
+					<div class="control">
+						<label class="label">Output Format</label>
+						<div class="radio-group">
+							<label><input type="radio" name="output-format" value="jpeg" checked /> JPEG</label>
+							<label><input type="radio" name="output-format" value="pdf" /> PDF</label>
+							<label><input type="radio" name="output-format" value="both" /> Both</label>
+						</div>
+					</div>
+
+					<div id="live-preview">
+						<canvas id="preview-canvas" width="400" height="250"></canvas>
+					</div>
+
+					<div class="actions"><button class="btn" id="to-step-5">Next: Generate</button></div>
+				</div>
+			</section>
+
+			<section id="step-5" class="step" style="display:none">
+				<div class="step-number">5</div>
+				<div class="card">
+					<h2>Generate</h2>
+					<button class="btn" id="generate-btn">Generate My Certificates →</button>
+
+					<div id="progress-bar-wrap" class="progress" style="display:none">
+						<div class="progress-outer">
+							<div class="progress-inner" style="width:0%"></div>
+						</div>
+						<div class="progress-text">0%</div>
+					</div>
+
+					<div id="result-area" style="display:none">
+						<div class="success">Certificates ready.</div>
+						<div class="actions">
+							<button class="btn" id="download-zip">Download ZIP</button>
+							<button class="btn" id="new-batch">Start new batch</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+		<script type="module" src="js/app.js"></script>
+	</body>
+</html>
