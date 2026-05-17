@@ -49,14 +49,33 @@ async function handleGenerate(){
   const progressWrap = document.getElementById('progress-bar-wrap');
   const inner = document.querySelector('.progress-inner');
   const text = document.querySelector('.progress-text');
+  // show both compact progress and the larger hero
+  const hero = document.getElementById('progress-hero');
+  if(hero) hero.style.display = '';
   progressWrap.style.display = '';
   inner.style.width = '0%'; text.textContent = '0%';
+  // big percent and files count
+  const bigPercent = document.querySelector('.big-percent'); if(bigPercent) bigPercent.textContent = '0%';
+  const filesCount = document.getElementById('files-count'); if(filesCount) filesCount.textContent = window.state.totalNames || 0;
+  const etaEl = document.getElementById('eta'); if(etaEl) etaEl.textContent = 'Estimating…';
 
   const estimatedSeconds = Math.max(2, window.state.totalNames * 0.3);
   let pct = 0;
+  const startTime = Date.now();
   progressInterval = setInterval(()=>{
     pct = Math.min(90, pct + Math.random()*5);
     inner.style.width = pct + '%'; text.textContent = Math.round(pct) + '%';
+    if(document.querySelector('.big-percent')) document.querySelector('.big-percent').textContent = Math.round(pct) + '%';
+    // naive ETA estimate: remaining percent / progress rate
+    const etaEl2 = document.getElementById('eta');
+    if(etaEl2){
+      // approximate remaining seconds based on pct increments over time
+      const elapsed = (Date.now() - startTime)/1000; // seconds
+      const rate = Math.max(0.5, pct/Math.max(1, elapsed));
+      const remain = Math.max(0, 100 - pct);
+      const estSec = Math.round(remain / rate);
+      etaEl2.textContent = estSec > 60 ? Math.round(estSec/60) + 'm' : estSec + 's';
+    }
   }, 200);
 
   const fd = new FormData();
@@ -74,6 +93,8 @@ async function handleGenerate(){
     const res = await fetch(window.API_BASE + '/api/generate', { method:'POST', body: fd });
     clearInterval(progressInterval);
     inner.style.width = '100%'; text.textContent = '100%';
+    if(document.querySelector('.big-percent')) document.querySelector('.big-percent').textContent = '100%';
+    const etaEl3 = document.getElementById('eta'); if(etaEl3) etaEl3.textContent = 'Done';
     if(res.ok){
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

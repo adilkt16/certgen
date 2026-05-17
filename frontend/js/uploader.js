@@ -25,6 +25,14 @@ function handleTemplateFile(file){
   window.state.templateFile = file;
   const url = URL.createObjectURL(file);
   templatePreview.src = url;
+  // Update a right-hand preview image and filename if the redesigned UI includes them
+  try{
+    const rightPreview = document.getElementById('right-preview-image');
+    const rightFilename = document.getElementById('right-preview-filename');
+    if(rightPreview) rightPreview.src = url;
+    if(rightFilename) rightFilename.textContent = file.name || rightFilename.textContent;
+  }catch(e){ /* ignore if elements not present */ }
+
   templatePreview.onload = ()=>{
     window.state.templateWidth = templatePreview.naturalWidth;
     window.state.templateHeight = templatePreview.naturalHeight;
@@ -66,6 +74,12 @@ function handleSpreadsheetFile(file){
       window.state.columns = json.columns || [];
       window.state.totalNames = json.total || 0;
       if(window.state.totalNames > 200){ showError(`Batch limit is 200. You uploaded ${window.state.totalNames} names.`); return; }
+      // update preview-count badge if present
+      try{
+        const previewCountBadge = document.querySelector('.preview-header .preview-badge') || document.getElementById('preview-count-badge');
+        const previewRows = (json.preview || []).length;
+        if(previewCountBadge) previewCountBadge.textContent = `Showing first ${previewRows} rows`;
+      }catch(e){}
       // populate select
       columnSelect.innerHTML = '';
       json.columns.forEach(c=>{ const opt = document.createElement('option'); opt.value = c; opt.textContent = c; columnSelect.appendChild(opt); });
@@ -85,6 +99,33 @@ function handleSpreadsheetFile(file){
       }
       rowCount.textContent = `${window.state.totalNames} names loaded`;
       spreadsheetInfo.style.display = '';
+      // show upload success callout
+      try{
+        const successEl = document.getElementById('upload-success');
+        if(successEl){ successEl.style.display=''; successEl.textContent = `Upload Success — ${window.state.totalNames} names found`; }
+      }catch(e){}
+      // quick preview checks: empty values in first column or duplicates in preview
+      try{
+        const warnEl = document.getElementById('upload-warning');
+        const rows = json.preview || [];
+        if(warnEl){
+          const firstCol = rows.length>0?Object.keys(rows[0])[0]:null;
+          let emptyCount = 0;
+          const seen = new Set(); let dupCount = 0;
+          rows.forEach(r=>{
+            const v = firstCol? (r[firstCol]||'').toString().trim() : '';
+            if(!v) emptyCount++;
+            if(v){ if(seen.has(v)) dupCount++; else seen.add(v); }
+          });
+          if(emptyCount>0 || dupCount>0){
+            warnEl.style.display='';
+            const parts = [];
+            if(emptyCount>0) parts.push(`${emptyCount} empty rows in preview`);
+            if(dupCount>0) parts.push(`${dupCount} duplicate names in preview`);
+            warnEl.textContent = parts.join(' · ');
+          } else { warnEl.style.display='none'; }
+        }
+      }catch(e){}
       // set previewName for renderPreview
       if(rows.length>0){ const firstRow = rows[0]; const firstCol = Object.keys(firstRow)[0]; window.state.previewName = firstRow[firstCol] || window.state.previewName; }
       if (window.renderPreview) window.renderPreview();

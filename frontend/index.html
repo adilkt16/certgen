@@ -14,17 +14,39 @@
 			<div class="gold-rule"></div>
 		</header>
 
-		<div id="step-indicator">
-			<div class="indicator-line">
-				<div class="marker active"><span>Template</span></div>
-				<div class="marker"><span>Placement</span></div>
-				<div class="marker"><span>Names</span></div>
-				<div class="marker"><span>Style</span></div>
-				<div class="marker"><span>Generate</span></div>
-			</div>
-		</div>
+		<!-- Page layout: left sidebar, content column, right preview -->
+		<div class="layout">
+			<aside class="sidebar" role="navigation" aria-label="Workflow">
+				<div class="brand">
+					<div class="brand-icon">★</div>
+					<div class="brand-title">CertGen</div>
+					<div class="brand-sub">INSTITUTIONAL</div>
+				</div>
+				<nav class="side-nav">
+					<button class="side-item active">Upload Template</button>
+					<button class="side-item">Place Name</button>
+					<button class="side-item">Upload Names</button>
+					<button class="side-item">Style</button>
+					<button class="side-item">Generate</button>
+				</nav>
+				<div class="side-actions">
+					<button class="btn">Save Draft</button>
+					<button class="btn ghost">Help Center</button>
+				</div>
+			</aside>
 
-		<main>
+			<div class="content">
+				<div id="step-indicator">
+					<div class="indicator-line">
+						<div class="marker active"><span>Template</span></div>
+						<div class="marker"><span>Placement</span></div>
+						<div class="marker"><span>Names</span></div>
+						<div class="marker"><span>Style</span></div>
+						<div class="marker"><span>Generate</span></div>
+					</div>
+				</div>
+
+				<main>
 			<section id="step-1" class="step">
 				<div class="step-number">1</div>
 				<div class="card">
@@ -40,12 +62,29 @@
 				<div class="step-number">2</div>
 				<div class="card">
 					<h2>Place the Name</h2>
+					<div class="coord-panel">
+						<div class="coord-item"><span class="coord-label">X</span> <span id="coord-x">0 px</span></div>
+						<div class="coord-item"><span class="coord-label">Y</span> <span id="coord-y">0 px</span></div>
+						<label class="snap-label"><input id="snap-toggle" type="checkbox" /> Snap 10px</label>
+					</div>
 					<div id="canvas-wrapper">
 						<img id="template-preview" src="#" alt="Template preview" />
 						<div id="name-tag">Full Name</div>
 					</div>
 					<div id="position-display">X: 50.0%  Y: 58.0%</div>
 					<div class="actions"><button class="btn" id="to-step-3">Next: Names</button></div>
+				</div>
+
+				<!-- Text toolbar (binding added in JS) -->
+				<div id="text-toolbar" class="text-toolbar" aria-hidden="false">
+					<button id="toolbar-bold" title="Bold">B</button>
+					<button id="toolbar-italic" title="Italic">I</button>
+					<button id="toolbar-decrease" title="Decrease size">−</button>
+					<span id="toolbar-size">32pt</span>
+					<button id="toolbar-increase" title="Increase size">+</button>
+					<button id="toolbar-align-left" title="Align left">L</button>
+					<button id="toolbar-align-center" title="Align center">C</button>
+					<button id="toolbar-align-right" title="Align right">R</button>
 				</div>
 			</section>
 
@@ -57,6 +96,10 @@
 					<input id="spreadsheet-input" type="file" accept=".csv,.xlsx" style="display:none" />
 					<div id="spreadsheet-info" class="info" style="display:none">
 						<div id="row-count"></div>
+						<!-- Upload success callout (filled by uploader.js) -->
+						<div id="upload-success" class="upload-success" style="display:none"></div>
+						<!-- Lightweight preview warnings (empty/duplicates in preview) -->
+						<div id="upload-warning" class="upload-warning" style="display:none"></div>
 						<label class="label">Column</label>
 						<select id="column-select"></select>
 						<div id="preview-table-wrap">
@@ -75,17 +118,17 @@
 						<div class="control">
 							<label class="label">Font</label>
 							<select id="font-select">
+								<option value="bodoni_moda">Bodoni Moda</option>
+								<option value="playfair_display">Playfair Display</option>
+								<option value="eb_garamond">EB Garamond</option>
 								<option value="cinzel_bold">Cinzel Bold</option>
-								<option value="cinzel_regular">Cinzel Regular</option>
-								<option value="playfair_bold">Playfair Bold</option>
-								<option value="playfair_regular">Playfair Regular</option>
-								<option value="montserrat_bold">Montserrat Bold</option>
-								<option value="montserrat_regular">Montserrat Regular</option>
-								<option value="lato_bold">Lato Bold</option>
-								<option value="lato_regular">Lato Regular</option>
-								<option value="raleway_bold">Raleway Bold</option>
-								<option value="opensans_bold">OpenSans Bold</option>
+								<option value="montserrat_regular">Montserrat</option>
 							</select>
+							<div class="font-cards">
+								<button class="font-card" data-font="bodoni_moda">Bodoni Moda</button>
+								<button class="font-card" data-font="playfair_display">Playfair Display</button>
+								<button class="font-card" data-font="eb_garamond">EB Garamond</button>
+							</div>
 						</div>
 						<div class="control">
 							<label class="label">Size</label>
@@ -97,6 +140,12 @@
 						<div class="control">
 							<label class="label">Color</label>
 							<input id="font-color-picker" type="color" value="#C9A84C" />
+							<div class="color-swatches">
+								<button class="color-swatch" data-color="#C9A84C" style="background:#C9A84C"></button>
+								<button class="color-swatch" data-color="#8B6F2E" style="background:#8B6F2E"></button>
+								<button class="color-swatch" data-color="#ffffff" style="background:#ffffff;border:1px solid #ddd"></button>
+								<button class="color-swatch" data-color="#0A3EA8" style="background:#0A3EA8"></button>
+							</div>
 						</div>
 					</div>
 
@@ -111,6 +160,11 @@
 
 					<div id="live-preview">
 						<canvas id="preview-canvas" width="400" height="250"></canvas>
+						<!-- Zoom/Fullscreen controls -->
+						<div class="preview-controls">
+							<button id="preview-zoom" title="Open larger preview">🔍</button>
+							<button id="preview-fullscreen" title="Fullscreen preview">⛶</button>
+						</div>
 					</div>
 
 					<div class="actions"><button class="btn" id="to-step-5">Next: Generate</button></div>
@@ -121,13 +175,21 @@
 				<div class="step-number">5</div>
 				<div class="card">
 					<h2>Generate</h2>
-					<button class="btn" id="generate-btn">Generate My Certificates →</button>
+					<button class="btn big-cta" id="generate-btn">Generate My Certificates →</button>
 
-					<div id="progress-bar-wrap" class="progress" style="display:none">
-						<div class="progress-outer">
-							<div class="progress-inner" style="width:0%"></div>
+					<div id="progress-hero" class="progress-hero" style="display:none">
+						<div class="hero-badges">
+							<div class="badge files-badge"><span id="files-count">0</span> Files</div>
+							<div class="badge dpi-badge">300 DPI</div>
 						</div>
-						<div class="progress-text">0%</div>
+						<div class="hero-percent"><span class="big-percent">0%</span></div>
+						<div class="hero-status">Rendering assets — <span id="eta">Estimating…</span></div>
+						<div id="progress-bar-wrap" class="progress" style="display:none">
+							<div class="progress-outer">
+								<div class="progress-inner" style="width:0%"></div>
+							</div>
+							<div class="progress-text">0%</div>
+						</div>
 					</div>
 
 					<div id="result-area" style="display:none">
@@ -140,6 +202,32 @@
 				</div>
 			</section>
 		</main>
+
+			</div> <!-- /.content -->
+
+			<aside class="right-panel" aria-label="Live preview">
+				<div class="card preview-card">
+					<div class="preview-header">Live Preview</div>
+					<div class="preview-stage">
+						<img id="right-preview-image" src="#" alt="Template preview" />
+						<div class="preview-caption">Your certificate preview will appear here</div>
+					</div>
+					<div class="preview-footer">
+						<div class="scale">Scale: 100%</div>
+						<div class="filename" id="right-preview-filename">Untitled_Template.jpg</div>
+					</div>
+				</div>
+			</aside>
+
+		</div> <!-- /.layout -->
+
+		<!-- Modal for enlarged preview -->
+		<div id="preview-modal" class="modal" aria-hidden="true">
+			<div class="modal-card">
+				<canvas id="modal-canvas"></canvas>
+				<div style="text-align:right;margin-top:8px;"><button id="modal-close" class="btn">Close</button></div>
+			</div>
+		</div>
 		<script type="module" src="js/app.js"></script>
 	</body>
 </html>
