@@ -270,11 +270,30 @@
 
 							<div class="control">
 								<label class="label">Output Format</label>
-								<div class="radio-group">
-									<label><input type="radio" name="output-format" value="jpeg" checked /> JPEG</label>
-									<label><input type="radio" name="output-format" value="pdf" /> PDF</label>
-									<label><input type="radio" name="output-format" value="both" /> Both</label>
+								<div class="format-group" role="radiogroup" aria-label="Output format">
+									<label class="format-option">
+										<input type="radio" name="output-format" value="jpeg" checked />
+										<span class="format-card">
+											<span class="format-title">JPEG</span>
+											<span class="format-sub">One image per name</span>
+										</span>
+									</label>
+									<label class="format-option">
+										<input type="radio" name="output-format" value="pdf" />
+										<span class="format-card">
+											<span class="format-title">PDF</span>
+											<span class="format-sub">Print-ready files</span>
+										</span>
+									</label>
+									<label class="format-option">
+										<input type="radio" name="output-format" value="both" />
+										<span class="format-card">
+											<span class="format-title">Both</span>
+											<span class="format-sub">JPEG + PDF in folders</span>
+										</span>
+									</label>
 								</div>
+								<div id="output-format-hint" class="output-hint">Output: JPEG only</div>
 							</div>
 
 

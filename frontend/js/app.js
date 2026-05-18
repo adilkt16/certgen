@@ -24,7 +24,7 @@ const state = {
   fontName: "cinzel_bold",
   fontSize: 64,
   fontColorHex: "#C9A84C",
-  outputFormat: "both",
+  outputFormat: "jpeg",
   previewName: "Participant Name",
   bold: false,
   italic: false,
@@ -142,6 +142,12 @@ function goToStep(n){
       if(i<=n) marker.classList.add('active'); else marker.classList.remove('active');
     }
   }
+
+  document.querySelectorAll('.side-item').forEach((btn, idx)=>{
+    const isActive = idx === (n - 1);
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-current', isActive ? 'step' : 'false');
+  });
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -150,6 +156,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const element = document.getElementById(id);
     if(element){
       element.addEventListener(eventName, handler);
+    }
+  };
+
+  const syncOutputFormat = ()=>{
+    const selected = document.querySelector('input[name="output-format"]:checked');
+    if(selected){
+      state.outputFormat = selected.value;
+    }
+    const hint = document.getElementById('output-format-hint');
+    if(hint){
+      const label = state.outputFormat === 'pdf'
+        ? 'PDF only'
+        : (state.outputFormat === 'both' ? 'JPEG + PDF' : 'JPEG only');
+      hint.textContent = `Output: ${label}`;
     }
   };
 
@@ -190,11 +210,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   document.querySelectorAll('input[name="output-format"]').forEach(r=>{
-    r.addEventListener('change', (e)=>{ state.outputFormat = e.target.value; });
+    r.addEventListener('change', ()=>{ syncOutputFormat(); });
   });
+  syncOutputFormat();
 
   // Generate button
   on('generate-btn', 'click', ()=>{
+    syncOutputFormat();
     handleGenerate();
   });
 
@@ -203,11 +225,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // Sidebar step navigation (wire visual sidebar to goToStep)
   document.querySelectorAll('.side-item').forEach((btn, idx)=>{
-    btn.addEventListener('click', ()=>{ goToStep(idx+1);
-      // update active class
-      document.querySelectorAll('.side-item').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-    });
+    btn.addEventListener('click', ()=>{ goToStep(idx+1); });
   });
 
   // Text toolbar bindings
