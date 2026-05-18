@@ -35,6 +35,18 @@ window.state = state;
 window.API_BASE = API_BASE;
 window.renderPreview = renderPreview;
 window.handleGenerate = handleGenerate;
+// Expose client-side defaults matching backend env defaults
+window.MAX_TEMPLATE_SIZE_MB = 10;
+window.MAX_SPREADSHEET_SIZE_MB = 5;
+
+// Global error helper: prefer in-page upload-warning, fallback to alert
+window.showAppError = function(msg){
+  try{
+    const warnEl = document.getElementById('upload-warning');
+    if(warnEl){ warnEl.style.display=''; warnEl.textContent = msg; return; }
+  }catch(e){}
+  alert(msg);
+};
 
 function fontLabelFromId(fontId){
   if(!fontId) return '';
@@ -177,14 +189,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // Proceed buttons
   on('to-step-2', 'click', ()=>{
-    if(!state.templateFile){ alert('Please upload a template first'); return; }
+    if(!state.templateFile){ window.showAppError('Please upload a template first'); return; }
     goToStep(2);
   });
   on('to-step-3', 'click', ()=>{
     goToStep(3);
   });
   on('to-step-4', 'click', ()=>{
-    if(!state.nameColumn || state.totalNames<=0){ alert('Please load names and select a column'); return; }
+    if(!state.nameColumn || state.totalNames<=0){ window.showAppError('Please load names and select a column'); return; }
     goToStep(4);
   });
 

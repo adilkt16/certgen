@@ -118,9 +118,9 @@ function renderPreview(){
 let progressInterval = null;
 
 async function handleGenerate(){
-  if(!window.state.templateFile){ alert('Please upload a template'); return; }
-  if(!window.state.spreadsheetFile){ alert('Please upload a spreadsheet'); return; }
-  if(!window.state.nameColumn){ alert('Please select a name column'); return; }
+  if(!window.state.templateFile){ window.showAppError('Please upload a template'); return; }
+  if(!window.state.spreadsheetFile){ window.showAppError('Please upload a spreadsheet'); return; }
+  if(!window.state.nameColumn){ window.showAppError('Please select a name column'); return; }
 
   const progressWrap = document.getElementById('progress-bar-wrap');
   const inner = document.querySelector('.progress-inner');
@@ -185,12 +185,12 @@ async function handleGenerate(){
       success.textContent = `${window.state.totalNames} certificates generated`;
     } else {
       const err = await res.json().catch(()=>({error:'Unknown error'}));
-      alert(err.error || 'Generation failed');
+      window.showAppError(err.error || 'Generation failed');
       progressWrap.style.display = 'none';
     }
   }catch(e){
     clearInterval(progressInterval);
-    alert('Generation request failed');
+    window.showAppError('Generation request failed');
     progressWrap.style.display = 'none';
   }
 }

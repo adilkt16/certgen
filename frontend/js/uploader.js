@@ -4,6 +4,7 @@
 const templateZone = document.getElementById('template-drop-zone');
 const templateInput = document.getElementById('template-input');
 const templateInfo = document.getElementById('template-info');
+const templateWarning = document.getElementById('template-warning');
 
 const spreadsheetZone = document.getElementById('spreadsheet-drop-zone');
 const spreadsheetInput = document.getElementById('spreadsheet-input');
@@ -12,15 +13,46 @@ const columnSelect = document.getElementById('column-select');
 const previewTable = document.getElementById('preview-table');
 const rowCount = document.getElementById('row-count');
 
-function showError(msg){ alert(msg); }
+function showError(msg){
+  // Prefer in-page upload warning element when available for better UX
+  try{
+    const warnEl = document.getElementById('spreadsheet-warning');
+    if(warnEl){ warnEl.style.display=''; warnEl.textContent = msg; return; }
+  }catch(e){}
+  alert(msg);
+}
+
+function showTemplateError(msg){
+  try{
+    if(templateWarning){
+      templateWarning.style.display = '';
+      templateWarning.textContent = msg;
+      return;
+    }
+  }catch(e){}
+  showError(msg);
+}
+
+function clearTemplateError(){
+  try{
+    if(templateWarning){
+      templateWarning.style.display = 'none';
+      templateWarning.textContent = '';
+    }
+  }catch(e){}
+}
 
 // Template handlers
 function handleTemplateFile(file){
   if(!file) return;
+  clearTemplateError();
   if(file.type !== 'image/jpeg' && file.type !== 'image/png'){
-    showError('Only JPEG or PNG files are allowed'); return;
+    showTemplateError('Only JPEG or PNG files are allowed'); return;
   }
-  if(file.size > 10 * 1024 * 1024){ showError('File must be under 10MB'); return; }
+  try{
+    const maxTpl = window.MAX_TEMPLATE_SIZE_MB || 10;
+    if(file.size > maxTpl * 1024 * 1024){ showTemplateError(`Template is above the limit. Please upload a file under ${maxTpl}MB.`); return; }
+  }catch(e){}
   window.state.templateFile = file;
   const url = URL.createObjectURL(file);
   const img = new Image();
@@ -53,13 +85,31 @@ function handleSpreadsheetFile(file){
   if(!file) return;
   const name = (file.name || '').toLowerCase();
   if(!(name.endsWith('.xlsx') || name.endsWith('.csv'))){ showError('Only .xlsx and .csv files are allowed'); return; }
+  try{
+    const maxSp = window.MAX_SPREADSHEET_SIZE_MB || 5;
+    if(file.size > maxSp * 1024 * 1024){ showError(`Spreadsheet must be under ${maxSp}MB`); return; }
+  }catch(e){}
   window.state.spreadsheetFile = file;
 
   const fd = new FormData();
   fd.append('spreadsheet_file', file);
   fetch(window.API_BASE + '/api/parse-spreadsheet', { method:'POST', body: fd })
     .then(async res => {
-      if(!res.ok){ throw new Error('Could not parse spreadsheet'); }
+      if(!res.ok){
+        // try to surface a helpful server-provided message
+        let body = null;
+        try{ body = await res.json(); }catch(e){ /* non-json response */ }
+        if(body && body.code === 'SPREADSHEET_TOO_LARGE'){
+          showError(`Spreadsheet is too large. Please keep files under the limit (${body.error || 'see server settings'}).`);
+          throw new Error('SPREADSHEET_TOO_LARGE');
+        }
+        if(body && body.code === 'PARSE_ERROR'){
+          showError(body.error || 'Could not parse spreadsheet. Please check the file format.');
+          throw new Error('PARSE_ERROR');
+        }
+        // fallback to generic
+        throw new Error('Could not parse spreadsheet');
+      }
       return res.json();
     })
     .then(json => {
@@ -98,7 +148,7 @@ function handleSpreadsheetFile(file){
       }catch(e){}
       // quick preview checks: empty values in first column or duplicates in preview
       try{
-        const warnEl = document.getElementById('upload-warning');
+        const warnEl = document.getElementById('preview-warning');
         const rows = json.preview || [];
         if(warnEl){
           const firstCol = rows.length>0?Object.keys(rows[0])[0]:null;
@@ -122,7 +172,11 @@ function handleSpreadsheetFile(file){
       if(rows.length>0){ const firstRow = rows[0]; const firstCol = Object.keys(firstRow)[0]; window.state.previewName = firstRow[firstCol] || window.state.previewName; }
       if (window.renderPreview) window.renderPreview();
     })
-    .catch(err => { showError('Could not read spreadsheet. Please check the file.'); });
+    .catch(err => {
+      // ignore thrown internal sentinel errors (message already shown)
+      if(err && (err.message === 'SPREADSHEET_TOO_LARGE' || err.message === 'PARSE_ERROR')) return;
+      showError('Could not read spreadsheet. Please check the file.');
+    });
 }
 
 spreadsheetZone.addEventListener('click', ()=> spreadsheetInput.click());

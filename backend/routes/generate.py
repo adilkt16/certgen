@@ -16,8 +16,17 @@ router = fastapi.APIRouter()
 
 @router.post("/parse-spreadsheet")
 async def parse_spreadsheet(spreadsheet_file: UploadFile):
+	max_spreadsheet_mb = int(os.environ.get("MAX_SPREADSHEET_SIZE_MB", "5"))
 	try:
 		content = await spreadsheet_file.read()
+		if len(content) > max_spreadsheet_mb * 1024 * 1024:
+			return fastapi.responses.JSONResponse(
+				status_code=400,
+				content={
+					"error": f"Spreadsheet must be under {max_spreadsheet_mb}MB",
+					"code": "SPREADSHEET_TOO_LARGE",
+				},
+			)
 		rows = spreadsheet.parse_spreadsheet(content, spreadsheet_file.filename)
 	except ValueError as e:
 		return fastapi.responses.JSONResponse(
@@ -84,8 +93,17 @@ async def generate(
 				"code": "TEMPLATE_TOO_LARGE",
 			},
 		)
+	max_spreadsheet_mb = int(os.environ.get("MAX_SPREADSHEET_SIZE_MB", "5"))
 	try:
 		sp_bytes = await spreadsheet_file.read()
+		if len(sp_bytes) > max_spreadsheet_mb * 1024 * 1024:
+			return fastapi.responses.JSONResponse(
+				status_code=400,
+				content={
+					"error": f"Spreadsheet must be under {max_spreadsheet_mb}MB",
+					"code": "SPREADSHEET_TOO_LARGE",
+				},
+			)
 		rows = spreadsheet.parse_spreadsheet(sp_bytes, spreadsheet_file.filename)
 	except ValueError as e:
 		return fastapi.responses.JSONResponse(
