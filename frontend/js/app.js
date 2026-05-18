@@ -213,12 +213,32 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // Text toolbar bindings
   const toolbarSize = document.getElementById('toolbar-size');
   if(toolbarSize) toolbarSize.textContent = state.fontSize + 'pt';
+
+  const setToolbarToggle = (id, isActive)=>{
+    const btn = document.getElementById(id);
+    if(!btn) return;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  };
+
+  const setAlignActive = (align)=>{
+    const value = align || 'center';
+    setToolbarToggle('toolbar-align-left', value === 'left');
+    setToolbarToggle('toolbar-align-center', value === 'center');
+    setToolbarToggle('toolbar-align-right', value === 'right');
+  };
+
+  setToolbarToggle('toolbar-bold', state.bold);
+  setToolbarToggle('toolbar-italic', state.italic);
+  setAlignActive(state.textAlign);
   on('toolbar-bold', 'click', ()=>{
     state.bold = !state.bold;
+    setToolbarToggle('toolbar-bold', state.bold);
     renderPreview();
   });
   on('toolbar-italic', 'click', ()=>{
     state.italic = !state.italic;
+    setToolbarToggle('toolbar-italic', state.italic);
     renderPreview();
   });
   on('toolbar-increase', 'click', ()=>{
@@ -231,9 +251,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const slider = document.getElementById('font-size-slider'); if(slider) slider.value = state.fontSize;
     renderPreview();
   });
-  on('toolbar-align-left', 'click', ()=>{ state.textAlign = 'left'; renderPreview(); });
-  on('toolbar-align-center', 'click', ()=>{ state.textAlign = 'center'; renderPreview(); });
-  on('toolbar-align-right', 'click', ()=>{ state.textAlign = 'right'; renderPreview(); });
+  on('toolbar-align-left', 'click', ()=>{ state.textAlign = 'left'; setAlignActive('left'); renderPreview(); });
+  on('toolbar-align-center', 'click', ()=>{ state.textAlign = 'center'; setAlignActive('center'); renderPreview(); });
+  on('toolbar-align-right', 'click', ()=>{ state.textAlign = 'right'; setAlignActive('right'); renderPreview(); });
 
   // Font cards are built dynamically in initFonts()
 

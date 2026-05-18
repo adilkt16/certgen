@@ -212,14 +212,35 @@
 							</div>
 							<div id="position-display">X: 50.0%  Y: 58.0%</div>
 							<div id="text-toolbar" class="text-toolbar" aria-hidden="false">
-								<button id="toolbar-bold" title="Bold">B</button>
-								<button id="toolbar-italic" title="Italic">I</button>
-								<button id="toolbar-decrease" title="Decrease size">−</button>
-								<span id="toolbar-size">32pt</span>
-								<button id="toolbar-increase" title="Increase size">+</button>
-								<button id="toolbar-align-left" title="Align left">L</button>
-								<button id="toolbar-align-center" title="Align center">C</button>
-								<button id="toolbar-align-right" title="Align right">R</button>
+								<div class="toolbar-group">
+									<div class="toolbar-label">Style</div>
+									<div class="toolbar-controls">
+										<button id="toolbar-bold" class="toolbar-btn" title="Bold" aria-pressed="false">
+											<span class="toolbar-icon">B</span>
+											<span class="toolbar-text">Bold</span>
+										</button>
+										<button id="toolbar-italic" class="toolbar-btn" title="Italic" aria-pressed="false">
+											<span class="toolbar-icon">I</span>
+											<span class="toolbar-text">Italic</span>
+										</button>
+									</div>
+								</div>
+								<div class="toolbar-group">
+									<div class="toolbar-label">Size</div>
+									<div class="toolbar-controls">
+										<button id="toolbar-decrease" class="toolbar-btn" title="Smaller">A-</button>
+										<span id="toolbar-size" class="toolbar-size">32pt</span>
+										<button id="toolbar-increase" class="toolbar-btn" title="Larger">A+</button>
+									</div>
+								</div>
+								<div class="toolbar-group">
+									<div class="toolbar-label">Align</div>
+									<div class="toolbar-controls">
+										<button id="toolbar-align-left" class="toolbar-btn" title="Align left" aria-pressed="false">Left</button>
+										<button id="toolbar-align-center" class="toolbar-btn active" title="Align center" aria-pressed="true">Center</button>
+										<button id="toolbar-align-right" class="toolbar-btn" title="Align right" aria-pressed="false">Right</button>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div class="style-panel">
