@@ -22,13 +22,14 @@ function renderPreview(){
     const scale = canvas.width / templateWidth;
     let fullSize = parseInt(window.state.fontSize, 10) || 64;
     let previewSize = Math.max(1, Math.round(fullSize * scale));
-    ctx.font = `${previewSize}px sans-serif`;
+    const fontFamily = window.state.fontName ? `"${window.state.fontName}"` : 'sans-serif';
+    ctx.font = `${previewSize}px ${fontFamily}, sans-serif`;
     let measured = ctx.measureText(previewName).width;
     while(measured > canvas.width * 0.80){
       fullSize -= 2;
       if(fullSize < 12) break;
       previewSize = Math.max(1, Math.round(fullSize * scale));
-      ctx.font = `${previewSize}px sans-serif`;
+      ctx.font = `${previewSize}px ${fontFamily}, sans-serif`;
       measured = ctx.measureText(previewName).width;
     }
 

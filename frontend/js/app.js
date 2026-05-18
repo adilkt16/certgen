@@ -33,6 +33,114 @@ window.API_BASE = API_BASE;
 window.renderPreview = renderPreview;
 window.handleGenerate = handleGenerate;
 
+function fontLabelFromId(fontId){
+  if(!fontId) return '';
+  return fontId
+    .split('_')
+    .map(part => part ? part[0].toUpperCase() + part.slice(1) : part)
+    .join(' ');
+}
+
+function normalizeFontEntry(entry){
+  if(typeof entry === 'string'){
+    return { id: entry, label: fontLabelFromId(entry), weight: 400, style: 'normal' };
+  }
+  if(!entry || !entry.id) return null;
+  return {
+    id: entry.id,
+    label: entry.label || fontLabelFromId(entry.id),
+    weight: entry.weight || 400,
+    style: entry.style || 'normal'
+  };
+}
+
+async function fetchFontManifest(){
+  try{
+    const res = await fetch(API_BASE + '/api/fonts');
+    if(!res.ok) return [];
+    const json = await res.json();
+    const list = Array.isArray(json.fonts) ? json.fonts : [];
+    return list.map(normalizeFontEntry).filter(Boolean);
+  }catch(e){
+    return [];
+  }
+}
+
+function applyFontToNameTag(){
+  const nameTag = document.getElementById('name-tag');
+  if(nameTag && state.fontName){
+    nameTag.style.fontFamily = `"${state.fontName}", serif`;
+  }
+}
+
+function setActiveFontCard(fontId){
+  document.querySelectorAll('.font-card').forEach(c=>{
+    if(c.getAttribute('data-font') === fontId){
+      c.classList.add('active');
+    } else {
+      c.classList.remove('active');
+    }
+  });
+}
+
+function setFontName(fontId){
+  if(!fontId) return;
+  state.fontName = fontId;
+  setActiveFontCard(fontId);
+  applyFontToNameTag();
+  renderPreview();
+}
+
+function buildFontControls(fonts){
+  const cardsWrap = document.getElementById('font-cards');
+  if(!cardsWrap) return;
+
+  cardsWrap.innerHTML = '';
+  fonts.forEach(font => {
+    const btn = document.createElement('button');
+    btn.className = 'font-card';
+    btn.setAttribute('data-font', font.id);
+    btn.textContent = font.label;
+    btn.style.fontFamily = `"${font.id}", serif`;
+    if(font.weight) btn.style.fontWeight = String(font.weight);
+    btn.addEventListener('click', ()=> setFontName(font.id));
+    cardsWrap.appendChild(btn);
+  });
+
+  const exists = fonts.some(f => f.id === state.fontName);
+  if(!exists && fonts.length > 0){
+    state.fontName = fonts[0].id;
+  }
+  if(state.fontName){
+    setActiveFontCard(state.fontName);
+  }
+  applyFontToNameTag();
+}
+
+async function loadFontFaces(fonts){
+  const loads = fonts.map(font => {
+    const url = API_BASE + '/api/fonts/' + encodeURIComponent(font.id);
+    const face = new FontFace(font.id, `url(${url})`, {
+      weight: String(font.weight || 'normal'),
+      style: font.style || 'normal'
+    });
+    return face.load().then(loaded => { document.fonts.add(loaded); }).catch(()=>{});
+  });
+  await Promise.all(loads);
+}
+
+async function initFonts(){
+  const fonts = await fetchFontManifest();
+  if(!fonts.length){
+    applyFontToNameTag();
+    return;
+  }
+  buildFontControls(fonts);
+  await loadFontFaces(fonts);
+  applyFontToNameTag();
+  renderPreview();
+}
+
 function goToStep(n){
   for(let i=1;i<=5;i++){
     const s = document.getElementById(`step-${i}`);
@@ -45,6 +153,7 @@ function goToStep(n){
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
+  initFonts();
   const on = (id, eventName, handler) => {
     const element = document.getElementById(id);
     if(element){
@@ -71,16 +180,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   // Style controls
-  const fontSelect = document.getElementById('font-select');
-  if(fontSelect){
-    fontSelect.addEventListener('change', (e)=>{
-      state.fontName = e.target.value;
-      const nameTag = document.getElementById('name-tag');
-      if(nameTag) nameTag.style.fontFamily = e.target.value;
-      renderPreview();
-    });
-  }
-
   const fontSlider = document.getElementById('font-size-slider');
   const fontValue = document.getElementById('font-size-value');
   if(fontSlider){
@@ -153,19 +252,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   on('toolbar-align-center', 'click', ()=>{ if(nameTag) nameTag.style.textAlign = 'center'; renderPreview(); });
   on('toolbar-align-right', 'click', ()=>{ if(nameTag) nameTag.style.textAlign = 'right'; renderPreview(); });
 
-  // Font card clicks: keep select for compatibility but provide card UI
-  document.querySelectorAll('.font-card').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const f = btn.getAttribute('data-font');
-      state.fontName = f;
-      const sel = document.getElementById('font-select'); if(sel) sel.value = f;
-      // visual active
-      document.querySelectorAll('.font-card').forEach(c=>c.classList.remove('active'));
-      btn.classList.add('active');
-      const nt = document.getElementById('name-tag'); if(nt) nt.style.fontFamily = f;
-      renderPreview();
-    });
-  });
+  // Font cards are built dynamically in initFonts()
 
   // Color swatches
   document.querySelectorAll('.color-swatch').forEach(s=>{

@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import services.font_manager as font_manager
 from routes import generate as generate_routes
+from routes import fonts as font_routes
 
 
 @asynccontextmanager
@@ -28,16 +29,12 @@ app.add_middleware(
 )
 
 app.include_router(generate_routes.router, prefix="/api")
+app.include_router(font_routes.router, prefix="/api")
 
 
 @app.get("/health")
 async def health():
 	return {"status": "ok", "service": "certgen-backend"}
-
-
-@app.get("/api/fonts")
-async def list_fonts():
-	return {"fonts": font_manager.get_font_list()}
 
 
 if __name__ == "__main__":
