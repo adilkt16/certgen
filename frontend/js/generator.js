@@ -1,6 +1,6 @@
 // generator.js
 
-function drawPreviewToCanvas(canvas, img){
+function drawPreviewToCanvas(canvas, img, showGuides){
   if(!canvas) return;
   const previewName = window.state.previewName || 'Participant Name';
   canvas.width = 400;
@@ -59,6 +59,46 @@ function drawPreviewToCanvas(canvas, img){
   } else {
     drawText(drawX, y);
   }
+
+  if(showGuides){
+    const textCenterX = drawX + (measured / 2);
+    const textCenterY = y;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const guideThreshold = 10;
+    const nearX = Math.abs(textCenterX - centerX) <= guideThreshold;
+    const nearY = Math.abs(textCenterY - centerY) <= guideThreshold;
+
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(201,168,76,0.18)';
+    ctx.beginPath();
+    ctx.moveTo(centerX, 0);
+    ctx.lineTo(centerX, canvas.height);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(canvas.width, centerY);
+    ctx.stroke();
+
+    if(nearX){
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(201,168,76,0.85)';
+      ctx.beginPath();
+      ctx.moveTo(centerX, 0);
+      ctx.lineTo(centerX, canvas.height);
+      ctx.stroke();
+    }
+    if(nearY){
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(201,168,76,0.85)';
+      ctx.beginPath();
+      ctx.moveTo(0, centerY);
+      ctx.lineTo(canvas.width, centerY);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 }
 
 function renderPreview(){
@@ -71,7 +111,7 @@ function renderPreview(){
   const img = new Image();
   img.src = URL.createObjectURL(window.state.templateFile);
   img.onload = ()=>{
-    canvases.forEach(canvas => drawPreviewToCanvas(canvas, img));
+    canvases.forEach(canvas => drawPreviewToCanvas(canvas, img, canvas.id === 'preview-canvas'));
   };
 }
 
