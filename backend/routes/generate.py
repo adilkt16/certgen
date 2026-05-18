@@ -4,6 +4,8 @@ import fastapi
 
 from fastapi import UploadFile
 
+from PIL import Image, UnidentifiedImageError
+
 import services.spreadsheet as spreadsheet
 import services.certificate as certificate
 import services.zip_builder as zip_builder
@@ -44,23 +46,41 @@ async def generate(
 	text_align: str = fastapi.Form("center"),
 ):
 	max_template_mb = int(os.environ.get("MAX_TEMPLATE_SIZE_MB", "10"))
-	# Validate template format
-	tpl_name = (template_file.filename or "").lower()
-	if not tpl_name.endswith((".jpg", ".jpeg", ".png")):
-		return fastapi.responses.JSONResponse(
-			status_code=400,
-			content={
-				"error": "Template must be JPEG or PNG",
-				"code": "UNSUPPORTED_TEMPLATE_FORMAT",
-			},
-		)
-
+	# Read bytes and enforce size-bytes limit first
 	template_bytes = await template_file.read()
 	if len(template_bytes) > max_template_mb * 1024 * 1024:
 		return fastapi.responses.JSONResponse(
 			status_code=400,
 			content={
 				"error": f"Template must be under {max_template_mb}MB",
+				"code": "TEMPLATE_TOO_LARGE",
+			},
+		)
+
+	# Validate actual image content (magic-bytes) and dimensions
+	try:
+		with Image.open(io.BytesIO(template_bytes)) as img:
+			img.verify()
+		# Re-open to read dimensions (verify() may leave file in unusable state)
+		with Image.open(io.BytesIO(template_bytes)) as img2:
+			width, height = img2.size
+	except UnidentifiedImageError:
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={"error": "Uploaded file is not a valid image.", "code": "INVALID_IMAGE"},
+		)
+	except Exception:
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={"error": "Invalid image file.", "code": "INVALID_IMAGE"},
+		)
+
+	# Enforce pixel-count cap (25 megapixels)
+	if width * height > 25_000_000:
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={
+				"error": "Template exceeds maximum pixel dimensions",
 				"code": "TEMPLATE_TOO_LARGE",
 			},
 		)
