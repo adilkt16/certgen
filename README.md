@@ -36,3 +36,12 @@ python3 -m http.server 5500
 
 ## Cost: $0/month
 This project can run at no monthly cost on the free tiers of Railway and Netlify as long as usage stays within those providers' free-tier limits.
+
+## Legal & Policies
+The site includes the following consumer-facing pages in the frontend:
+
+- Privacy Policy: `frontend/privacy.html`
+- Terms of Service: `frontend/terms.html`
+- Security Overview: `frontend/security.html`
+
+These pages are intended to explain data handling, legal terms, and security practices for operators and users.
