@@ -1,69 +1,77 @@
 // generator.js
 
-function renderPreview(){
-  const canvas = document.getElementById('preview-canvas');
+function drawPreviewToCanvas(canvas, img){
   if(!canvas) return;
-  if(!window.state.templateFile) return;
   const previewName = window.state.previewName || 'Participant Name';
+  canvas.width = 400;
+  const templateWidth = Math.max(1, window.state.templateWidth || img.naturalWidth || 1);
+  const templateHeight = Math.max(1, window.state.templateHeight || img.naturalHeight || 1);
+  canvas.height = Math.round(400 * (templateHeight / templateWidth));
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  const x = window.state.xPct * canvas.width;
+  const y = window.state.yPct * canvas.height;
+
+  // Match backend sizing by scaling from real template dimensions,
+  // then applying the same auto-shrink rule (max 80% width, min 12 on full image).
+  const scale = canvas.width / templateWidth;
+  let fullSize = parseInt(window.state.fontSize, 10) || 64;
+  let previewSize = Math.max(1, Math.round(fullSize * scale));
+  const fontFamily = window.state.fontName ? `"${window.state.fontName}"` : 'sans-serif';
+  ctx.font = `${previewSize}px ${fontFamily}, sans-serif`;
+  let measured = ctx.measureText(previewName).width;
+  while(measured > canvas.width * 0.80){
+    fullSize -= 2;
+    if(fullSize < 12) break;
+    previewSize = Math.max(1, Math.round(fullSize * scale));
+    ctx.font = `${previewSize}px ${fontFamily}, sans-serif`;
+    measured = ctx.measureText(previewName).width;
+  }
+
+  const textAlign = window.state.textAlign || 'center';
+  const isBold = !!window.state.bold;
+  const isItalic = !!window.state.italic;
+  const italicSkew = 0.2;
+  const drawX = textAlign === 'left' ? x : (textAlign === 'right' ? x - measured : x - (measured / 2));
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = window.state.fontColorHex;
+
+  const strokeWidth = isBold ? Math.max(1, Math.round(previewSize / 24)) : 0;
+
+  const drawText = (px, py)=>{
+    if(strokeWidth > 0){
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = window.state.fontColorHex;
+      ctx.strokeText(previewName, px, py);
+    }
+    ctx.fillText(previewName, px, py);
+  };
+
+  if(isItalic){
+    ctx.save();
+    ctx.translate(drawX, y);
+    ctx.transform(1, italicSkew, 0, 1, 0, 0);
+    drawText(0, 0);
+    ctx.restore();
+  } else {
+    drawText(drawX, y);
+  }
+}
+
+function renderPreview(){
+  if(!window.state.templateFile) return;
+  const canvases = [
+    document.getElementById('preview-canvas'),
+    document.getElementById('generate-preview-canvas')
+  ].filter(Boolean);
+  if(!canvases.length) return;
   const img = new Image();
   img.src = URL.createObjectURL(window.state.templateFile);
   img.onload = ()=>{
-    canvas.width = 400;
-    const templateWidth = Math.max(1, window.state.templateWidth || img.naturalWidth || 1);
-    const templateHeight = Math.max(1, window.state.templateHeight || img.naturalHeight || 1);
-    canvas.height = Math.round(400 * (templateHeight / templateWidth));
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    const x = window.state.xPct * canvas.width;
-    const y = window.state.yPct * canvas.height;
-
-    // Match backend sizing by scaling from real template dimensions,
-    // then applying the same auto-shrink rule (max 80% width, min 12 on full image).
-    const scale = canvas.width / templateWidth;
-    let fullSize = parseInt(window.state.fontSize, 10) || 64;
-    let previewSize = Math.max(1, Math.round(fullSize * scale));
-    const fontFamily = window.state.fontName ? `"${window.state.fontName}"` : 'sans-serif';
-    ctx.font = `${previewSize}px ${fontFamily}, sans-serif`;
-    let measured = ctx.measureText(previewName).width;
-    while(measured > canvas.width * 0.80){
-      fullSize -= 2;
-      if(fullSize < 12) break;
-      previewSize = Math.max(1, Math.round(fullSize * scale));
-      ctx.font = `${previewSize}px ${fontFamily}, sans-serif`;
-      measured = ctx.measureText(previewName).width;
-    }
-
-    const textAlign = window.state.textAlign || 'center';
-    const isBold = !!window.state.bold;
-    const isItalic = !!window.state.italic;
-    const italicSkew = 0.2;
-    const drawX = textAlign === 'left' ? x : (textAlign === 'right' ? x - measured : x - (measured / 2));
-
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = window.state.fontColorHex;
-
-    const strokeWidth = isBold ? Math.max(1, Math.round(previewSize / 24)) : 0;
-
-    const drawText = (px, py)=>{
-      if(strokeWidth > 0){
-        ctx.lineWidth = strokeWidth;
-        ctx.strokeStyle = window.state.fontColorHex;
-        ctx.strokeText(previewName, px, py);
-      }
-      ctx.fillText(previewName, px, py);
-    };
-
-    if(isItalic){
-      ctx.save();
-      ctx.translate(drawX, y);
-      ctx.transform(1, italicSkew, 0, 1, 0, 0);
-      drawText(0, 0);
-      ctx.restore();
-    } else {
-      drawText(drawX, y);
-    }
+    canvases.forEach(canvas => drawPreviewToCanvas(canvas, img));
   };
 }
 

@@ -151,32 +151,40 @@
 
 			<section id="step-4" class="step" style="display:none">
 				<div class="step-number">4</div>
-				<div class="card">
-					<h2>Generate</h2>
-					<button class="btn big-cta" id="generate-btn">Generate My Certificates →</button>
+				<div class="generate-grid">
+					<div class="card generate-panel">
+						<h2>Generate</h2>
+						<button class="btn big-cta" id="generate-btn">Generate My Certificates →</button>
 
-					<div id="progress-hero" class="progress-hero" style="display:none">
-						<div class="hero-badges">
-							<div class="badge files-badge"><span id="files-count">0</span> Files</div>
-							<div class="badge dpi-badge">300 DPI</div>
-						</div>
-						<div class="hero-percent"><span class="big-percent">0%</span></div>
-						<div class="hero-status">Rendering assets — <span id="eta">Estimating…</span></div>
-						<div id="progress-bar-wrap" class="progress" style="display:none">
-							<div class="progress-outer">
-								<div class="progress-inner" style="width:0%"></div>
+						<div id="progress-hero" class="progress-hero" style="display:none">
+							<div class="hero-badges">
+								<div class="badge files-badge"><span id="files-count">0</span> Files</div>
+								<div class="badge dpi-badge">300 DPI</div>
 							</div>
-							<div class="progress-text">0%</div>
+							<div class="hero-percent"><span class="big-percent">0%</span></div>
+							<div class="hero-status">Rendering assets — <span id="eta">Estimating…</span></div>
+							<div id="progress-bar-wrap" class="progress" style="display:none">
+								<div class="progress-outer">
+									<div class="progress-inner" style="width:0%"></div>
+								</div>
+								<div class="progress-text">0%</div>
+							</div>
+						</div>
+
+						<div id="result-area" style="display:none">
+							<div class="success">Certificates ready.</div>
+							<div class="actions">
+								<button class="btn" id="download-zip">Download ZIP</button>
+								<button class="btn" id="new-batch">Start new batch</button>
+							</div>
 						</div>
 					</div>
 
-					<div id="result-area" style="display:none">
-						<div class="success">Certificates ready.</div>
-						<div class="actions">
-							<button class="btn" id="download-zip">Download ZIP</button>
-							<button class="btn" id="new-batch">Start new batch</button>
-						</div>
-					</div>
+					<aside class="card generate-preview-card" aria-label="Final preview">
+						<div class="preview-header">Final Preview</div>
+						<canvas id="generate-preview-canvas" width="400" height="250"></canvas>
+						<div class="preview-caption">Matches your placement and styling</div>
+					</aside>
 				</div>
 			</section>
 		</main>
