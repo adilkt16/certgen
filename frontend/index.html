@@ -5,46 +5,173 @@
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<title>CertGen</title>
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="css/main.css">
 	</head>
 	<body>
-		<header>
-			<div class="wordmark">CertGen</div>
-			<div class="gold-rule"></div>
+		<header class="site-header">
+			<div class="nav">
+				<div class="brand-mark">CertGen</div>
+				<nav class="nav-links" aria-label="Primary">
+					<a href="#platform">Platform</a>
+					<a href="#process">Process</a>
+					<a href="#institution">Institution</a>
+					<a href="#pricing">Pricing</a>
+				</nav>
+				<a class="btn primary nav-cta" href="#workflow-app">Get Started</a>
+			</div>
 		</header>
 
-		<!-- Page layout: left sidebar and content column -->
-		<div class="layout">
-			<aside class="sidebar" role="navigation" aria-label="Workflow">
-				<div class="brand">
-					<div class="brand-icon">★</div>
-					<div class="brand-title">CertGen</div>
-					<div class="brand-sub">INSTITUTIONAL</div>
-				</div>
-				<nav class="side-nav">
-					<button class="side-item active">Upload Template</button>
-					<button class="side-item">Placement &amp; Style</button>
-					<button class="side-item">Upload Names</button>
-					<button class="side-item">Generate</button>
-				</nav>
-				<div class="side-actions">
-					<button class="btn">Save Draft</button>
-					<button class="btn ghost">Help Center</button>
-				</div>
-			</aside>
-
-			<div class="content">
-				<div id="step-indicator">
-					<div class="indicator-line">
-						<div class="marker active"><span>Template</span></div>
-						<div class="marker"><span>Placement &amp; Style</span></div>
-						<div class="marker"><span>Names</span></div>
-						<div class="marker"><span>Generate</span></div>
+		<main class="page">
+			<section class="hero" id="platform">
+				<div class="container hero-grid">
+					<div class="hero-copy">
+						<div class="section-kicker">CERTGEN INSTITUTIONAL</div>
+						<h1 class="hero-title">
+							Institutional <span class="hero-italic">Excellence,</span><br>
+							<span class="hero-accent">Certified.</span>
+						</h1>
+						<p class="hero-sub">
+							The definitive platform for high-volume, professional certificate issuance.
+							Transform spreadsheets into prestige through our curated editorial studio.
+						</p>
+						<div class="hero-actions">
+							<a class="btn primary" href="#workflow-app">Begin Workflow -&gt;</a>
+							<a class="btn ghost" href="#process">View Sample Gallery</a>
+						</div>
+						<div class="hero-footnote">Trusted by institutions that demand impeccable presentation.</div>
+					</div>
+					<div class="hero-visual" aria-hidden="true">
+						<div class="visual-frame">
+							<div class="visual-glass">
+								<div class="certificate-card">
+									<div class="certificate-title">Certificate of Achievement</div>
+									<div class="certificate-name">Elena Mora</div>
+									<div class="certificate-line"></div>
+									<div class="certificate-body">For outstanding excellence in institutional design.</div>
+									<div class="certificate-signatures">
+										<div class="signature"></div>
+										<div class="signature"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="ledger-badge">
+							<div class="ledger-dot"></div>
+							Secured by CertGen Ledger
+						</div>
 					</div>
 				</div>
+			</section>
 
-				<main>
+			<section class="feature-section" id="institution">
+				<div class="container feature-grid">
+					<div class="feature-card large">
+						<div class="feature-tag">THE STANDARD</div>
+						<h2>Unyielding Prestige</h2>
+						<p>Every pixel is engineered to command respect. Our typography and layout engine ensures your institutional authority is reflected in every issuance.</p>
+					</div>
+					<div class="feature-stack">
+						<div class="feature-card">
+							<div class="feature-icon"></div>
+							<h3>Efficiency</h3>
+							<p>Automate thousands of bespoke certificates in minutes, not days.</p>
+						</div>
+						<div class="feature-card gold">
+							<div class="feature-icon dark"></div>
+							<h3>Scalability</h3>
+							<p>From boutique workshops to global universities, we grow with your volume.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="workflow-section" id="process">
+				<div class="container">
+					<div class="section-kicker">THE WORKFLOW</div>
+					<h2 class="section-title">A Masterpiece in Five Steps</h2>
+					<div class="workflow-steps">
+						<div class="workflow-step">
+							<div class="step-num">01</div>
+							<div class="step-title">Upload Template</div>
+							<p>Bring your existing institutional layout or start from a blank slate.</p>
+						</div>
+						<div class="workflow-step">
+							<div class="step-num">02</div>
+							<div class="step-title">Position Recipient</div>
+							<p>Intelligent drag-and-drop zones for dynamic naming and dates.</p>
+						</div>
+						<div class="workflow-step">
+							<div class="step-num">03</div>
+							<div class="step-title">Import Data</div>
+							<p>Securely connect your CRM or upload a spreadsheet of recipients.</p>
+						</div>
+						<div class="workflow-step">
+							<div class="step-num">04</div>
+							<div class="step-title">Studio Styling</div>
+							<p>Fine-tune kerning, weight, and color logic for perfect output.</p>
+						</div>
+						<div class="workflow-step">
+							<div class="step-num">05</div>
+							<div class="step-title">Batch Generation</div>
+							<p>One click to verify, sign, and distribute thousands of units.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="cta-section" id="pricing">
+				<div class="container">
+					<div class="cta-card">
+						<div class="section-kicker">READY</div>
+						<h2>Ready to Elevate Your Institutional Brand?</h2>
+						<p>Join over 500+ global institutions who trust CertGen for their most prestigious recognition programs.</p>
+						<div class="cta-actions">
+							<a class="btn primary" href="#workflow-app">Start Your First Batch</a>
+							<a class="btn ghost" href="#workflow-app">Request a Demo</a>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="workflow-app" class="app-shell">
+				<div class="container app-intro">
+					<div class="section-kicker">WORKFLOW STUDIO</div>
+					<h2 class="section-title">Launch your certificate production</h2>
+					<p class="section-subtitle">Move from template to distribution without leaving the studio.</p>
+				</div>
+
+				<!-- Page layout: left sidebar and content column -->
+				<div class="layout">
+					<aside class="sidebar" role="navigation" aria-label="Workflow">
+						<div class="brand">
+							<div class="brand-icon">★</div>
+							<div class="brand-title">CertGen</div>
+							<div class="brand-sub">INSTITUTIONAL</div>
+						</div>
+						<nav class="side-nav">
+							<button class="side-item active">Upload Template</button>
+							<button class="side-item">Placement &amp; Style</button>
+							<button class="side-item">Upload Names</button>
+							<button class="side-item">Generate</button>
+						</nav>
+						<div class="side-actions">
+							<button class="btn">Save Draft</button>
+							<button class="btn ghost">Help Center</button>
+						</div>
+					</aside>
+
+					<div class="content">
+						<div id="step-indicator">
+							<div class="indicator-line">
+								<div class="marker active"><span>Template</span></div>
+								<div class="marker"><span>Placement &amp; Style</span></div>
+								<div class="marker"><span>Names</span></div>
+								<div class="marker"><span>Generate</span></div>
+							</div>
+						</div>
+
+						<div class="app-main">
 			<section id="step-1" class="step">
 				<div class="step-number">1</div>
 				<div class="card">
@@ -187,11 +314,26 @@
 					</aside>
 				</div>
 			</section>
+					</div>
+
+				</div> <!-- /.content -->
+
+			</div> <!-- /.layout -->
+			</section>
 		</main>
 
-			</div> <!-- /.content -->
-
-		</div> <!-- /.layout -->
+		<footer class="site-footer">
+			<div class="container footer-inner">
+				<div class="footer-brand">CertGen</div>
+				<div class="footer-links">
+					<a href="#platform">Privacy Policy</a>
+					<a href="#platform">Terms of Service</a>
+					<a href="#platform">Security</a>
+					<a href="#platform">Contact</a>
+				</div>
+				<div class="footer-note">(c) 2026 CertGen Institutional. All rights reserved.</div>
+			</div>
+		</footer>
 
 		<!-- Modal for enlarged preview -->
 		<div id="preview-modal" class="modal" aria-hidden="true">
