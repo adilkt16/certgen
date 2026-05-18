@@ -39,6 +39,9 @@ async def generate(
 	font_size: int = fastapi.Form(...),
 	font_color_hex: str = fastapi.Form(...),
 	output_format: str = fastapi.Form(...),
+	bold: str = fastapi.Form("false"),
+	italic: str = fastapi.Form("false"),
+	text_align: str = fastapi.Form("center"),
 ):
 	max_template_mb = int(os.environ.get("MAX_TEMPLATE_SIZE_MB", "10"))
 	# Validate template format
@@ -81,6 +84,12 @@ async def generate(
 			},
 		)
 
+	bold_flag = str(bold).strip().lower() in ("1", "true", "yes", "on")
+	italic_flag = str(italic).strip().lower() in ("1", "true", "yes", "on")
+	text_align_clean = str(text_align or "center").strip().lower()
+	if text_align_clean not in ("left", "center", "right"):
+		text_align_clean = "center"
+
 	certificates = []
 	for n in names:
 		out = certificate.generate_certificate(
@@ -92,6 +101,9 @@ async def generate(
 			font_size,
 			font_color_hex,
 			output_format,
+			bold_flag,
+			italic_flag,
+			text_align_clean,
 		)
 		certificates.append({"name": n, "jpeg": out.get("jpeg"), "pdf": out.get("pdf")})
 

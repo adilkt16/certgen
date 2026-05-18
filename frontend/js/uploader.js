@@ -3,7 +3,6 @@
 
 const templateZone = document.getElementById('template-drop-zone');
 const templateInput = document.getElementById('template-input');
-const templatePreview = document.getElementById('template-preview');
 const templateInfo = document.getElementById('template-info');
 
 const spreadsheetZone = document.getElementById('spreadsheet-drop-zone');
@@ -24,15 +23,15 @@ function handleTemplateFile(file){
   if(file.size > 10 * 1024 * 1024){ showError('File must be under 10MB'); return; }
   window.state.templateFile = file;
   const url = URL.createObjectURL(file);
-  templatePreview.src = url;
-
-  templatePreview.onload = ()=>{
-    window.state.templateWidth = templatePreview.naturalWidth;
-    window.state.templateHeight = templatePreview.naturalHeight;
+  const img = new Image();
+  img.onload = ()=>{
+    window.state.templateWidth = img.naturalWidth;
+    window.state.templateHeight = img.naturalHeight;
     templateInfo.style.display = '';
-    templateInfo.textContent = `${file.name} — ${templatePreview.naturalWidth}×${templatePreview.naturalHeight} — ${(file.size/1024).toFixed(1)} KB`;
+    templateInfo.textContent = `${file.name} — ${img.naturalWidth}×${img.naturalHeight} — ${(file.size/1024).toFixed(1)} KB`;
     if (window.renderPreview) window.renderPreview();
   };
+  img.src = url;
   // Replace upload zone content with thumbnail
   templateZone.innerHTML = '';
   const thumb = document.createElement('img');

@@ -2,6 +2,7 @@
 
 function renderPreview(){
   const canvas = document.getElementById('preview-canvas');
+  if(!canvas) return;
   if(!window.state.templateFile) return;
   const previewName = window.state.previewName || 'Participant Name';
   const img = new Image();
@@ -33,10 +34,36 @@ function renderPreview(){
       measured = ctx.measureText(previewName).width;
     }
 
-    ctx.fillStyle = window.state.fontColorHex;
-    ctx.textAlign = 'center';
+    const textAlign = window.state.textAlign || 'center';
+    const isBold = !!window.state.bold;
+    const isItalic = !!window.state.italic;
+    const italicSkew = 0.2;
+    const drawX = textAlign === 'left' ? x : (textAlign === 'right' ? x - measured : x - (measured / 2));
+
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(previewName, x, y);
+    ctx.fillStyle = window.state.fontColorHex;
+
+    const strokeWidth = isBold ? Math.max(1, Math.round(previewSize / 24)) : 0;
+
+    const drawText = (px, py)=>{
+      if(strokeWidth > 0){
+        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = window.state.fontColorHex;
+        ctx.strokeText(previewName, px, py);
+      }
+      ctx.fillText(previewName, px, py);
+    };
+
+    if(isItalic){
+      ctx.save();
+      ctx.translate(drawX, y);
+      ctx.transform(1, italicSkew, 0, 1, 0, 0);
+      drawText(0, 0);
+      ctx.restore();
+    } else {
+      drawText(drawX, y);
+    }
   };
 }
 
@@ -89,6 +116,9 @@ async function handleGenerate(){
   fd.append('font_size', window.state.fontSize);
   fd.append('font_color_hex', window.state.fontColorHex);
   fd.append('output_format', window.state.outputFormat);
+  fd.append('bold', window.state.bold ? 'true' : 'false');
+  fd.append('italic', window.state.italic ? 'true' : 'false');
+  fd.append('text_align', window.state.textAlign || 'center');
 
   try{
     const res = await fetch(window.API_BASE + '/api/generate', { method:'POST', body: fd });

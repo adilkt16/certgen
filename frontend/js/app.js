@@ -26,6 +26,9 @@ const state = {
   fontColorHex: "#C9A84C",
   outputFormat: "both",
   previewName: "Participant Name",
+  bold: false,
+  italic: false,
+  textAlign: "center",
 };
 
 window.state = state;
@@ -66,13 +69,6 @@ async function fetchFontManifest(){
   }
 }
 
-function applyFontToNameTag(){
-  const nameTag = document.getElementById('name-tag');
-  if(nameTag && state.fontName){
-    nameTag.style.fontFamily = `"${state.fontName}", serif`;
-  }
-}
-
 function setActiveFontCard(fontId){
   document.querySelectorAll('.font-card').forEach(c=>{
     if(c.getAttribute('data-font') === fontId){
@@ -87,7 +83,6 @@ function setFontName(fontId){
   if(!fontId) return;
   state.fontName = fontId;
   setActiveFontCard(fontId);
-  applyFontToNameTag();
   renderPreview();
 }
 
@@ -114,7 +109,6 @@ function buildFontControls(fonts){
   if(state.fontName){
     setActiveFontCard(state.fontName);
   }
-  applyFontToNameTag();
 }
 
 async function loadFontFaces(fonts){
@@ -132,17 +126,15 @@ async function loadFontFaces(fonts){
 async function initFonts(){
   const fonts = await fetchFontManifest();
   if(!fonts.length){
-    applyFontToNameTag();
     return;
   }
   buildFontControls(fonts);
   await loadFontFaces(fonts);
-  applyFontToNameTag();
   renderPreview();
 }
 
 function goToStep(n){
-  for(let i=1;i<=5;i++){
+  for(let i=1;i<=4;i++){
     const s = document.getElementById(`step-${i}`);
     if(s) s.style.display = (i===n)?'':'none';
     const marker = document.querySelectorAll('#step-indicator .marker')[i-1];
@@ -175,9 +167,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(!state.nameColumn || state.totalNames<=0){ alert('Please load names and select a column'); return; }
     goToStep(4);
   });
-  on('to-step-5', 'click', ()=>{
-    goToStep(5);
-  });
 
   // Style controls
   const fontSlider = document.getElementById('font-size-slider');
@@ -186,8 +175,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     fontSlider.addEventListener('input', (e)=>{
       state.fontSize = parseInt(e.target.value,10);
       if(fontValue) fontValue.textContent = e.target.value;
-      const nameTag = document.getElementById('name-tag');
-      if(nameTag) nameTag.style.fontSize = state.fontSize + 'px';
+      const toolbarSize = document.getElementById('toolbar-size');
+      if(toolbarSize) toolbarSize.textContent = state.fontSize + 'pt';
       renderPreview();
     });
   }
@@ -196,8 +185,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(colorPicker){
     colorPicker.addEventListener('input', (e)=>{
       state.fontColorHex = e.target.value;
-      const nameTag = document.getElementById('name-tag');
-      if(nameTag) nameTag.style.color = state.fontColorHex;
       renderPreview();
     });
   }
@@ -224,33 +211,29 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   // Text toolbar bindings
-  const nameTag = document.getElementById('name-tag');
   const toolbarSize = document.getElementById('toolbar-size');
+  if(toolbarSize) toolbarSize.textContent = state.fontSize + 'pt';
   on('toolbar-bold', 'click', ()=>{
     state.bold = !state.bold;
-    if(nameTag) nameTag.style.fontWeight = state.bold ? '700' : '400';
     renderPreview();
   });
   on('toolbar-italic', 'click', ()=>{
     state.italic = !state.italic;
-    if(nameTag) nameTag.style.fontStyle = state.italic ? 'italic' : 'normal';
     renderPreview();
   });
   on('toolbar-increase', 'click', ()=>{
     state.fontSize = Math.min(200, state.fontSize + 2); toolbarSize.textContent = state.fontSize + 'pt';
     const slider = document.getElementById('font-size-slider'); if(slider) slider.value = state.fontSize;
-    if(nameTag) nameTag.style.fontSize = state.fontSize + 'px';
     renderPreview();
   });
   on('toolbar-decrease', 'click', ()=>{
     state.fontSize = Math.max(6, state.fontSize - 2); toolbarSize.textContent = state.fontSize + 'pt';
     const slider = document.getElementById('font-size-slider'); if(slider) slider.value = state.fontSize;
-    if(nameTag) nameTag.style.fontSize = state.fontSize + 'px';
     renderPreview();
   });
-  on('toolbar-align-left', 'click', ()=>{ if(nameTag) nameTag.style.textAlign = 'left'; renderPreview(); });
-  on('toolbar-align-center', 'click', ()=>{ if(nameTag) nameTag.style.textAlign = 'center'; renderPreview(); });
-  on('toolbar-align-right', 'click', ()=>{ if(nameTag) nameTag.style.textAlign = 'right'; renderPreview(); });
+  on('toolbar-align-left', 'click', ()=>{ state.textAlign = 'left'; renderPreview(); });
+  on('toolbar-align-center', 'click', ()=>{ state.textAlign = 'center'; renderPreview(); });
+  on('toolbar-align-right', 'click', ()=>{ state.textAlign = 'right'; renderPreview(); });
 
   // Font cards are built dynamically in initFonts()
 

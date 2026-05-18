@@ -1,83 +1,80 @@
 // placer.js
-const nameTag = document.getElementById('name-tag');
-const wrapper = document.getElementById('canvas-wrapper');
+const canvas = document.getElementById('preview-canvas');
 
-let isDragging = false;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
+let isPlacing = false;
 
-function getElemPos(el){
-  const rect = el.getBoundingClientRect();
-  return {left: rect.left, top: rect.top};
+function isSnapEnabled(){
+  const snapEl = document.getElementById('snap-toggle');
+  return snapEl ? snapEl.checked : false;
 }
 
-nameTag.addEventListener('mousedown', (e)=>{
-  isDragging = true;
-  nameTag.style.cursor = 'grabbing';
-  const pos = nameTag.getBoundingClientRect();
-  dragOffsetX = e.clientX - pos.left;
-  dragOffsetY = e.clientY - pos.top;
-  e.preventDefault();
-});
+function updatePlacement(clientX, clientY){
+  if(!canvas) return;
+  if(!window.state.templateFile) return;
 
-document.addEventListener('mousemove', (e)=>{
-  if(!isDragging) return;
-  const rect = wrapper.getBoundingClientRect();
-  let newLeft = e.clientX - rect.left - dragOffsetX + (nameTag.offsetWidth/2);
-  let newTop = e.clientY - rect.top - dragOffsetY + (nameTag.offsetHeight/2);
-  // optional snap
-  const snapEl = document.getElementById('snap-toggle');
-  const snap = snapEl ? snapEl.checked : false;
-  newLeft = Math.max(0, Math.min(newLeft, wrapper.offsetWidth));
-  newTop = Math.max(0, Math.min(newTop, wrapper.offsetHeight));
-  if(snap){ newLeft = Math.round(newLeft/10)*10; newTop = Math.round(newTop/10)*10; }
-  nameTag.style.left = newLeft + 'px';
-  nameTag.style.top = newTop + 'px';
-  window.state.xPct = Math.round((newLeft / wrapper.offsetWidth) * 1000) / 1000;
-  window.state.yPct = Math.round((newTop / wrapper.offsetHeight) * 1000) / 1000;
+  const rect = canvas.getBoundingClientRect();
+  if(rect.width <= 0 || rect.height <= 0) return;
+
+  let x = clientX - rect.left;
+  let y = clientY - rect.top;
+
+  x = Math.max(0, Math.min(x, rect.width));
+  y = Math.max(0, Math.min(y, rect.height));
+
+  if(isSnapEnabled()){
+    x = Math.round(x / 10) * 10;
+    y = Math.round(y / 10) * 10;
+  }
+
+  window.state.xPct = Math.round((x / rect.width) * 1000) / 1000;
+  window.state.yPct = Math.round((y / rect.height) * 1000) / 1000;
+
   const pd = document.getElementById('position-display');
-  pd.textContent = `X: ${(window.state.xPct*100).toFixed(1)}%  Y: ${(window.state.yPct*100).toFixed(1)}%`;
-  // update pixel readouts if present
+  if(pd){
+    pd.textContent = `X: ${(window.state.xPct*100).toFixed(1)}%  Y: ${(window.state.yPct*100).toFixed(1)}%`;
+  }
+
   const cx = document.getElementById('coord-x');
   const cy = document.getElementById('coord-y');
-  if(cx) cx.textContent = `${Math.round(newLeft)} px`;
-  if(cy) cy.textContent = `${Math.round(newTop)} px`;
-});
+  const templateW = window.state.templateWidth || rect.width;
+  const templateH = window.state.templateHeight || rect.height;
+  if(cx) cx.textContent = `${Math.round(window.state.xPct * templateW)} px`;
+  if(cy) cy.textContent = `${Math.round(window.state.yPct * templateH)} px`;
 
-document.addEventListener('mouseup', (e)=>{
-  isDragging = false; nameTag.style.cursor = 'grab';
-});
+  if(window.renderPreview) window.renderPreview();
+}
 
-// touch events
-nameTag.addEventListener('touchstart', (e)=>{
-  const t = e.touches[0];
-  isDragging = true; nameTag.style.cursor = 'grabbing';
-  const pos = nameTag.getBoundingClientRect();
-  dragOffsetX = t.clientX - pos.left; dragOffsetY = t.clientY - pos.top; e.preventDefault();
-});
+if(canvas){
+  canvas.addEventListener('mousedown', (e)=>{
+    isPlacing = true;
+    updatePlacement(e.clientX, e.clientY);
+  });
 
-document.addEventListener('touchmove', (e)=>{
-  if(!isDragging) return; const t = e.touches[0];
-  const rect = wrapper.getBoundingClientRect();
-  let newLeft = t.clientX - rect.left - dragOffsetX + (nameTag.offsetWidth/2);
-  let newTop = t.clientY - rect.top - dragOffsetY + (nameTag.offsetHeight/2);
-  const snapEl = document.getElementById('snap-toggle');
-  const snap = snapEl ? snapEl.checked : false;
-  newLeft = Math.max(0, Math.min(newLeft, wrapper.offsetWidth));
-  newTop = Math.max(0, Math.min(newTop, wrapper.offsetHeight));
-  if(snap){ newLeft = Math.round(newLeft/10)*10; newTop = Math.round(newTop/10)*10; }
-  nameTag.style.left = newLeft + 'px'; nameTag.style.top = newTop + 'px';
-  window.state.xPct = Math.round((newLeft / wrapper.offsetWidth) * 1000) / 1000;
-  window.state.yPct = Math.round((newTop / wrapper.offsetHeight) * 1000) / 1000;
-  const pd = document.getElementById('position-display');
-  pd.textContent = `X: ${(window.state.xPct*100).toFixed(1)}%  Y: ${(window.state.yPct*100).toFixed(1)}%`;
-  const cx = document.getElementById('coord-x');
-  const cy = document.getElementById('coord-y');
-  if(cx) cx.textContent = `${Math.round(newLeft)} px`;
-  if(cy) cy.textContent = `${Math.round(newTop)} px`;
-  e.preventDefault();
-});
+  document.addEventListener('mousemove', (e)=>{
+    if(!isPlacing) return;
+    updatePlacement(e.clientX, e.clientY);
+  });
 
-document.addEventListener('touchend', (e)=>{ isDragging = false; nameTag.style.cursor = 'grab'; });
+  document.addEventListener('mouseup', ()=>{
+    isPlacing = false;
+  });
+
+  canvas.addEventListener('touchstart', (e)=>{
+    if(!e.touches.length) return;
+    isPlacing = true;
+    updatePlacement(e.touches[0].clientX, e.touches[0].clientY);
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e)=>{
+    if(!isPlacing || !e.touches.length) return;
+    updatePlacement(e.touches[0].clientX, e.touches[0].clientY);
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', ()=>{
+    isPlacing = false;
+  });
+}
 
 export {};

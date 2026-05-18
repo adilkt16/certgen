@@ -24,9 +24,8 @@
 				</div>
 				<nav class="side-nav">
 					<button class="side-item active">Upload Template</button>
-					<button class="side-item">Place Name</button>
+					<button class="side-item">Placement &amp; Style</button>
 					<button class="side-item">Upload Names</button>
-					<button class="side-item">Style</button>
 					<button class="side-item">Generate</button>
 				</nav>
 				<div class="side-actions">
@@ -39,9 +38,8 @@
 				<div id="step-indicator">
 					<div class="indicator-line">
 						<div class="marker active"><span>Template</span></div>
-						<div class="marker"><span>Placement</span></div>
+						<div class="marker"><span>Placement &amp; Style</span></div>
 						<div class="marker"><span>Names</span></div>
-						<div class="marker"><span>Style</span></div>
 						<div class="marker"><span>Generate</span></div>
 					</div>
 				</div>
@@ -54,37 +52,78 @@
 					<div id="template-drop-zone" class="upload-zone">Click or drop an image here (JPEG or PNG)</div>
 					<input id="template-input" type="file" accept="image/jpeg,image/png" style="display:none" />
 					<div id="template-info" class="info" style="display:none"></div>
-					<div class="actions"><button class="btn" id="to-step-2">Next: Placement</button></div>
+					<div class="actions"><button class="btn" id="to-step-2">Next: Placement &amp; Style</button></div>
 				</div>
 			</section>
 
 			<section id="step-2" class="step" style="display:none">
 				<div class="step-number">2</div>
 				<div class="card">
-					<h2>Place the Name</h2>
-					<div class="coord-panel">
-						<div class="coord-item"><span class="coord-label">X</span> <span id="coord-x">0 px</span></div>
-						<div class="coord-item"><span class="coord-label">Y</span> <span id="coord-y">0 px</span></div>
-						<label class="snap-label"><input id="snap-toggle" type="checkbox" /> Snap 10px</label>
-					</div>
-					<div id="canvas-wrapper">
-						<img id="template-preview" src="#" alt="Template preview" />
-						<div id="name-tag">Full Name</div>
-					</div>
-					<div id="position-display">X: 50.0%  Y: 58.0%</div>
-					<div class="actions"><button class="btn" id="to-step-3">Next: Names</button></div>
-				</div>
+					<h2>Placement &amp; Style</h2>
+					<div class="place-style-grid">
+						<div class="place-panel">
+							<div class="coord-panel">
+								<div class="coord-item"><span class="coord-label">X</span> <span id="coord-x">0 px</span></div>
+								<div class="coord-item"><span class="coord-label">Y</span> <span id="coord-y">0 px</span></div>
+								<label class="snap-label"><input id="snap-toggle" type="checkbox" /> Snap 10px</label>
+							</div>
+							<div id="live-preview">
+								<canvas id="preview-canvas" width="400" height="250"></canvas>
+								<div class="preview-controls">
+									<button id="preview-zoom" title="Open larger preview">🔍</button>
+									<button id="preview-fullscreen" title="Fullscreen preview">⛶</button>
+								</div>
+							</div>
+							<div id="position-display">X: 50.0%  Y: 58.0%</div>
+							<div id="text-toolbar" class="text-toolbar" aria-hidden="false">
+								<button id="toolbar-bold" title="Bold">B</button>
+								<button id="toolbar-italic" title="Italic">I</button>
+								<button id="toolbar-decrease" title="Decrease size">−</button>
+								<span id="toolbar-size">32pt</span>
+								<button id="toolbar-increase" title="Increase size">+</button>
+								<button id="toolbar-align-left" title="Align left">L</button>
+								<button id="toolbar-align-center" title="Align center">C</button>
+								<button id="toolbar-align-right" title="Align right">R</button>
+							</div>
+						</div>
+						<div class="style-panel">
+							<div class="controls-row">
+								<div class="control">
+									<label class="label">Font</label>
+									<div id="font-cards" class="font-cards"></div>
+								</div>
+								<div class="control">
+									<label class="label">Size</label>
+									<div class="range-wrap">
+										<input id="font-size-slider" type="range" min="24" max="100" value="64" />
+										<span id="font-size-value">64</span>
+									</div>
+								</div>
+								<div class="control">
+									<label class="label">Color</label>
+									<input id="font-color-picker" type="color" value="#C9A84C" />
+									<div class="color-swatches">
+										<button class="color-swatch" data-color="#C9A84C" style="background:#C9A84C"></button>
+										<button class="color-swatch" data-color="#8B6F2E" style="background:#8B6F2E"></button>
+										<button class="color-swatch" data-color="#ffffff" style="background:#ffffff;border:1px solid #ddd"></button>
+										<button class="color-swatch" data-color="#0A3EA8" style="background:#0A3EA8"></button>
+									</div>
+								</div>
+							</div>
 
-				<!-- Text toolbar (binding added in JS) -->
-				<div id="text-toolbar" class="text-toolbar" aria-hidden="false">
-					<button id="toolbar-bold" title="Bold">B</button>
-					<button id="toolbar-italic" title="Italic">I</button>
-					<button id="toolbar-decrease" title="Decrease size">−</button>
-					<span id="toolbar-size">32pt</span>
-					<button id="toolbar-increase" title="Increase size">+</button>
-					<button id="toolbar-align-left" title="Align left">L</button>
-					<button id="toolbar-align-center" title="Align center">C</button>
-					<button id="toolbar-align-right" title="Align right">R</button>
+							<div class="control">
+								<label class="label">Output Format</label>
+								<div class="radio-group">
+									<label><input type="radio" name="output-format" value="jpeg" checked /> JPEG</label>
+									<label><input type="radio" name="output-format" value="pdf" /> PDF</label>
+									<label><input type="radio" name="output-format" value="both" /> Both</label>
+								</div>
+							</div>
+
+
+						</div>
+					</div>
+					<div class="actions"><button class="btn" id="to-step-3">Next: Names</button></div>
 				</div>
 			</section>
 
@@ -106,62 +145,12 @@
 							<table id="preview-table"></table>
 						</div>
 					</div>
-					<div class="actions"><button class="btn" id="to-step-4">Next: Style</button></div>
+					<div class="actions"><button class="btn" id="to-step-4">Next: Generate</button></div>
 				</div>
 			</section>
 
 			<section id="step-4" class="step" style="display:none">
 				<div class="step-number">4</div>
-				<div class="card">
-					<h2>Style</h2>
-					<div class="controls-row">
-						<div class="control">
-							<label class="label">Font</label>
-							<div id="font-cards" class="font-cards"></div>
-						</div>
-						<div class="control">
-							<label class="label">Size</label>
-							<div class="range-wrap">
-								<input id="font-size-slider" type="range" min="24" max="100" value="64" />
-								<span id="font-size-value">64</span>
-							</div>
-						</div>
-						<div class="control">
-							<label class="label">Color</label>
-							<input id="font-color-picker" type="color" value="#C9A84C" />
-							<div class="color-swatches">
-								<button class="color-swatch" data-color="#C9A84C" style="background:#C9A84C"></button>
-								<button class="color-swatch" data-color="#8B6F2E" style="background:#8B6F2E"></button>
-								<button class="color-swatch" data-color="#ffffff" style="background:#ffffff;border:1px solid #ddd"></button>
-								<button class="color-swatch" data-color="#0A3EA8" style="background:#0A3EA8"></button>
-							</div>
-						</div>
-					</div>
-
-					<div class="control">
-						<label class="label">Output Format</label>
-						<div class="radio-group">
-							<label><input type="radio" name="output-format" value="jpeg" checked /> JPEG</label>
-							<label><input type="radio" name="output-format" value="pdf" /> PDF</label>
-							<label><input type="radio" name="output-format" value="both" /> Both</label>
-						</div>
-					</div>
-
-					<div id="live-preview">
-						<canvas id="preview-canvas" width="400" height="250"></canvas>
-						<!-- Zoom/Fullscreen controls -->
-						<div class="preview-controls">
-							<button id="preview-zoom" title="Open larger preview">🔍</button>
-							<button id="preview-fullscreen" title="Fullscreen preview">⛶</button>
-						</div>
-					</div>
-
-					<div class="actions"><button class="btn" id="to-step-5">Next: Generate</button></div>
-				</div>
-			</section>
-
-			<section id="step-5" class="step" style="display:none">
-				<div class="step-number">5</div>
 				<div class="card">
 					<h2>Generate</h2>
 					<button class="btn big-cta" id="generate-btn">Generate My Certificates →</button>

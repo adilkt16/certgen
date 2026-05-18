@@ -21,7 +21,7 @@ body{
 	background:var(--black);
 }
 
-/* Layout: sidebar / content / right preview */
+/* Layout: sidebar / content */
 .layout{display:flex;gap:24px;align-items:flex-start;padding:0 32px 48px}
 .sidebar{width:220px;background:transparent;padding:28px 16px;border-right:1px solid rgba(255,255,255,0.02)}
 .sidebar .brand{color:var(--gold);margin-bottom:18px}
@@ -34,6 +34,11 @@ body{
 .side-actions .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
 
 .content{flex:1}
+
+/* Step 2 merged layout */
+.place-style-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,0.8fr);gap:24px;align-items:start;margin-top:8px}
+.place-panel,.style-panel{min-width:0}
+.style-panel{border-left:1px solid var(--border);padding-left:24px}
 
 /* Step 2 coordinate panel */
 .coord-panel{display:flex;gap:18px;align-items:center;margin-top:8px;margin-bottom:12px}
@@ -67,7 +72,7 @@ body{
 .modal .modal-card{background:#111;padding:16px;border-radius:6px}
 .modal canvas{max-width:90vw;max-height:90vh;display:block}
 
-/* Step 5: big progress hero */
+/* Generate step: big progress hero */
 .big-cta{padding:14px 20px;font-size:16px}
 .progress-hero{margin-top:16px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--border);border-radius:8px}
 .hero-badges{display:flex;gap:12px;align-items:center;margin-bottom:12px}
@@ -82,6 +87,9 @@ body{
 @media (max-width: 900px){
 	.layout{flex-direction:column;padding:0 18px}
 	.sidebar{width:100%;order:1}
+	.place-style-grid{grid-template-columns:1fr}
+	.style-panel{border-left:0;padding-left:0;margin-top:16px}
+	.controls-row{flex-direction:column;align-items:stretch}
 }
 
 header{
@@ -124,7 +132,7 @@ main{padding:24px 32px 80px 32px;display:flex;flex-direction:column;gap:24px}
 .card{position:relative;z-index:1;border-left:3px solid var(--gold);background:var(--surface);padding:2rem}
 
 /* Borders */
-.card, .upload-zone, select, input, .progress-outer, #canvas-wrapper{border:1px solid var(--border)}
+.card, .upload-zone, select, input, .progress-outer{border:1px solid var(--border)}
 
 /* Buttons */
 .btn{
@@ -151,18 +159,14 @@ main{padding:24px 32px 80px 32px;display:flex;flex-direction:column;gap:24px}
 
 .info{margin-top:12px;color:var(--muted);font-size:13px}
 
-#canvas-wrapper{position:relative;display:inline-block;max-width:900px;width:100%;background:transparent}
-#template-preview{width:100%;display:block}
-#name-tag{position:absolute;cursor:grab;border:1px dashed var(--gold);padding:8px 16px;white-space:nowrap;user-select:none;font-size:24px;color:var(--gold);background:rgba(0,0,0,0.5);transform:translate(-50%,-50%);left:50%;top:58%}
-
 #position-display{margin-top:8px;color:var(--muted)}
 
-.controls-row{display:flex;gap:16px;align-items:flex-end}
+.controls-row{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
 .control{flex:1}
 .range-wrap{display:flex;align-items:center;gap:8px}
 
 #live-preview{margin-top:16px}
-#preview-canvas{max-width:400px;width:100%;border:1px solid var(--border)}
+#preview-canvas{max-width:400px;width:100%;border:1px solid var(--border);cursor:crosshair}
 
 .progress{margin-top:16px}
 .progress-outer{width:100%;height:12px;border-radius:4px;background:transparent;border:1px solid var(--border);overflow:hidden}
