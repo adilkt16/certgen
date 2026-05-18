@@ -25,13 +25,6 @@ function handleTemplateFile(file){
   window.state.templateFile = file;
   const url = URL.createObjectURL(file);
   templatePreview.src = url;
-  // Update a right-hand preview image and filename if the redesigned UI includes them
-  try{
-    const rightPreview = document.getElementById('right-preview-image');
-    const rightFilename = document.getElementById('right-preview-filename');
-    if(rightPreview) rightPreview.src = url;
-    if(rightFilename) rightFilename.textContent = file.name || rightFilename.textContent;
-  }catch(e){ /* ignore if elements not present */ }
 
   templatePreview.onload = ()=>{
     window.state.templateWidth = templatePreview.naturalWidth;
