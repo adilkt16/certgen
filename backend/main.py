@@ -68,12 +68,32 @@ else:
 
 print(f"CORS allowed origins: {allowed_origins}")
 
+# Safe CORS: do not allow credentials with wildcard origins.
+# Behavior:
+# - In production (ENV=production or REQUIRE_API_KEYS=true) we fail-fast if
+#   credentials would be allowed with a wildcard origin to avoid insecure configs.
+# - In development we disable credentials and warn instead of failing the process.
+allow_credentials_env = os.environ.get("ALLOW_CREDENTIALS", "true").lower() in ("1", "true", "yes")
+env_raw = os.environ.get("ENV", "").lower()
+require_keys_env = os.environ.get("REQUIRE_API_KEYS", "").lower()
+require_keys_flag = require_keys_env in ("1", "true", "yes") or env_raw == "production"
+
+allow_credentials_flag = bool(allow_credentials_env)
+if allowed_origins == ["*"] and allow_credentials_flag:
+	if require_keys_flag:
+		logger.error("Invalid CORS configuration: allow_credentials=True with wildcard ALLOWED_ORIGINS in production.")
+		raise RuntimeError("ALLOWED_ORIGINS must be set to the exact frontend origin when allow_credentials is enabled in production.")
+	else:
+		# Non-production: disable credentials to avoid unsafe browser behaviors
+		logger.warning("Disabling CORS credentials because ALLOWED_ORIGINS='*' would otherwise be insecure.")
+		allow_credentials_flag = False
+
 app.add_middleware(
 	CORSMiddleware,
 	allow_origins=allowed_origins,
 	allow_methods=["*"],
 	allow_headers=["*"],
-	allow_credentials=True,
+	allow_credentials=allow_credentials_flag,
 )
 
 # Add rate limiter state to app
