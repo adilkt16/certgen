@@ -21,7 +21,7 @@ const state = {
   columns: [],
   nameColumn: "",
   totalNames: 0,
-  fontName: "cinzel_bold",
+  fontName: "playfair_display",
   fontSize: 64,
   fontColorHex: "#C9A84C",
   outputFormat: "jpeg",
@@ -72,11 +72,16 @@ function normalizeFontEntry(entry){
 async function fetchFontManifest(){
   try{
     const res = await fetch(API_BASE + '/api/fonts');
-    if(!res.ok) return [];
+    if(!res.ok) {
+      console.warn('Font manifest fetch failed:', res.status);
+      return [];
+    }
     const json = await res.json();
     const list = Array.isArray(json.fonts) ? json.fonts : [];
+    console.log('Fonts loaded:', list.length);
     return list.map(normalizeFontEntry).filter(Boolean);
   }catch(e){
+    console.error('Font manifest error:', e);
     return [];
   }
 }
@@ -131,7 +136,14 @@ async function loadFontFaces(fonts){
       weight: String(font.weight || 'normal'),
       style: font.style || 'normal'
     });
-    return face.load().then(loaded => { document.fonts.add(loaded); }).catch(()=>{});
+    return face.load()
+      .then(loaded => { 
+        document.fonts.add(loaded);
+        console.log('Font loaded:', font.id);
+      })
+      .catch(err => {
+        console.warn('Font load failed for', font.id, ':', err.message);
+      });
   });
   await Promise.all(loads);
 }
@@ -139,8 +151,10 @@ async function loadFontFaces(fonts){
 async function initFonts(){
   const fonts = await fetchFontManifest();
   if(!fonts.length){
+    console.warn('No fonts loaded from manifest');
     return;
   }
+  console.log('Building font controls for', fonts.length, 'fonts');
   buildFontControls(fonts);
   await loadFontFaces(fonts);
   renderPreview();

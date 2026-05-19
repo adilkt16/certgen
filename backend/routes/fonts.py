@@ -30,4 +30,4 @@ async def get_font_file(font_name: str):
 	if not os.path.exists(font_path):
 		raise fastapi.HTTPException(status_code=404, detail="Font file missing")
 
-	return FileResponse(font_path, media_type="font/ttf")
+	return FileResponse(font_path, media_type="application/x-font-ttf")
