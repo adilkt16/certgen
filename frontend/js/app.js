@@ -74,7 +74,8 @@ function normalizeFontEntry(entry){
 
 async function fetchFontManifest(){
   try{
-    const res = await fetch(API_BASE + '/api/fonts');
+    const headers = window.API_KEY ? { 'X-API-Key': window.API_KEY } : {};
+    const res = await fetch(API_BASE + '/api/fonts', { headers });
     if(!res.ok) {
       console.warn('Font manifest fetch failed:', res.status);
       return [];
@@ -133,20 +134,45 @@ function buildFontControls(fonts){
 }
 
 async function loadFontFaces(fonts){
-  const loads = fonts.map(font => {
-    const url = API_BASE + '/api/fonts/' + encodeURIComponent(font.id);
-    const face = new FontFace(font.id, `url(${url})`, {
-      weight: String(font.weight || 'normal'),
-      style: font.style || 'normal'
-    });
-    return face.load()
-      .then(loaded => { 
+  const loads = fonts.map(async font => {
+    const proxyUrl = API_BASE + '/api/fonts/proxy/' + encodeURIComponent(font.id);
+    const publicUrl = API_BASE + '/api/fonts/' + encodeURIComponent(font.id);
+    // Try binary fetch with API key header so we can create a blob URL for FontFace
+    try{
+      const headers = {};
+      if(window.API_KEY) headers['X-API-Key'] = window.API_KEY;
+      const res = await fetch(proxyUrl, { headers });
+      if(res && res.ok){
+        const ab = await res.arrayBuffer();
+        const mime = res.headers.get('content-type') || 'font/woff2';
+        const blob = new Blob([ab], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const face = new FontFace(font.id, `url(${url})`, {
+          weight: String(font.weight || 'normal'),
+          style: font.style || 'normal'
+        });
+        const loaded = await face.load();
         document.fonts.add(loaded);
-        console.log('Font loaded:', font.id);
-      })
-      .catch(err => {
-        console.warn('Font load failed for', font.id, ':', err.message);
+        console.log('Font loaded via proxy:', font.id);
+        return;
+      }
+      // Fall through to public URL if proxy fails
+    }catch(err){
+      console.warn('Proxy fetch failed for', font.id, err.message);
+    }
+
+    // Fallback: let the browser load the font directly from the public URL
+    try{
+      const face = new FontFace(font.id, `url(${publicUrl})`, {
+        weight: String(font.weight || 'normal'),
+        style: font.style || 'normal'
       });
+      const loaded = await face.load();
+      document.fonts.add(loaded);
+      console.log('Font loaded via public URL:', font.id);
+    }catch(err){
+      console.warn('Font load failed for', font.id, ':', err.message);
+    }
   });
   await Promise.all(loads);
 }

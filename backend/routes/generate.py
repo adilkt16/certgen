@@ -18,7 +18,8 @@ router = fastapi.APIRouter()
 
 
 @router.post("/parse-spreadsheet")
-async def parse_spreadsheet(spreadsheet_file: UploadFile):
+@limiter.limit("10/minute")
+async def parse_spreadsheet(request: Request, spreadsheet_file: UploadFile):
 	max_spreadsheet_mb = int(os.environ.get("MAX_SPREADSHEET_SIZE_MB", "5"))
 	try:
 		content = await spreadsheet_file.read()

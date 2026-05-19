@@ -87,12 +87,14 @@ app.include_router(font_routes.router, prefix="/api")
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 	"""Handle rate limit exceeded errors with user-friendly response."""
+	# Optionally include a Retry-After header to help clients back off.
 	return JSONResponse(
 		status_code=429,
 		content={
 			"error": "Too many requests. Please wait before trying again.",
 			"code": "RATE_LIMIT_EXCEEDED",
 		},
+		headers={"Retry-After": "60"},
 	)
 
 
