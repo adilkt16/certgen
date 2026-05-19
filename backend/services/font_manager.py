@@ -35,6 +35,7 @@ SUPPORTED_FONTS = {
 		"label": "Oswald",
 		"weight": 400,
 		"style": "normal",
+		"file": "oswald.regular.ttf",
 	},
 	"bungee": {
 		"url": "https://github.com/google/fonts/raw/main/ofl/bungee/Bungee-Regular.ttf",
