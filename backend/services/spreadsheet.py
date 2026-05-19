@@ -1,6 +1,14 @@
 import csv
 import io
+import re
 import openpyxl
+
+# Import font manager to get valid font list
+try:
+	if __name__ != "__main__":
+		from . import font_manager
+except ImportError:
+	font_manager = None
 
 
 def parse_spreadsheet(file_bytes, filename):
@@ -43,14 +51,29 @@ def get_column_names(rows):
 	return list(first.keys())
 
 
+def _sanitize_cell(val):
+	"""Strip leading =, +, -, @ from cell values to prevent CSV injection."""
+	s = str(val).strip()
+	s = re.sub(r'^[=+\-@]', '', s)
+	return s
+
+
 def get_names(rows, column):
+	"""Extract and sanitize names from a specific column."""
 	names = []
 	for row in rows:
 		val = row.get(column)
 		if val is None:
 			continue
-		s = str(val).strip()
+		s = _sanitize_cell(val)
 		if s:
 			names.append(s)
 	return names
+
+
+def get_valid_fonts():
+	"""Get the list of valid/allowlisted font names."""
+	if font_manager:
+		return font_manager.get_font_list()
+	return []
 

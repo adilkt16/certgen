@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import fastapi
 
 from fastapi import UploadFile
@@ -111,6 +112,17 @@ async def generate(
 			content={"error": str(e), "code": "PARSE_ERROR"},
 		)
 
+	# Validate column name exists in parsed rows
+	columns = spreadsheet.get_column_names(rows)
+	if name_column not in columns:
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={
+				"error": f"Column '{name_column}' not found in spreadsheet",
+				"code": "INVALID_COLUMN",
+			},
+		)
+
 	names = spreadsheet.get_names(rows, name_column)
 	max_batch = int(os.environ.get("MAX_BATCH_SIZE", "77"))
 	if len(names) > max_batch:
@@ -120,6 +132,55 @@ async def generate(
 				"error": f"Batch limit is {max_batch}. You uploaded {len(names)} names.",
 				"code": "BATCH_LIMIT_EXCEEDED",
 			},
+		)
+
+	# Validate x_pct and y_pct are within 0.0-1.0 range
+	try:
+		x_pct = float(x_pct)
+		y_pct = float(y_pct)
+		if not (0.0 <= x_pct <= 1.0):
+			return fastapi.responses.JSONResponse(
+				status_code=400,
+				content={"error": "x_pct must be between 0.0 and 1.0", "code": "INVALID_X_PCT"},
+			)
+		if not (0.0 <= y_pct <= 1.0):
+			return fastapi.responses.JSONResponse(
+				status_code=400,
+				content={"error": "y_pct must be between 0.0 and 1.0", "code": "INVALID_Y_PCT"},
+			)
+	except (ValueError, TypeError):
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={"error": "x_pct and y_pct must be valid numbers", "code": "INVALID_COORDINATES"},
+		)
+
+	# Validate font_size is within 6-500 range
+	try:
+		font_size = int(font_size)
+		if not (6 <= font_size <= 500):
+			return fastapi.responses.JSONResponse(
+				status_code=400,
+				content={"error": "font_size must be between 6 and 500", "code": "INVALID_FONT_SIZE"},
+			)
+	except (ValueError, TypeError):
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={"error": "font_size must be a valid integer", "code": "INVALID_FONT_SIZE"},
+		)
+
+	# Validate font_color_hex format (must be #RRGGBB)
+	if not re.match(r'^#[0-9A-Fa-f]{6}$', str(font_color_hex)):
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={"error": "font_color_hex must be a valid hex color (e.g., #C9A84C)", "code": "INVALID_HEX_COLOR"},
+		)
+
+	# Validate font_name is in the allowlist
+	valid_fonts = spreadsheet.get_valid_fonts()
+	if font_name not in valid_fonts:
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={"error": f"Unknown font: {font_name}", "code": "INVALID_FONT_NAME"},
 		)
 
 	bold_flag = str(bold).strip().lower() in ("1", "true", "yes", "on")

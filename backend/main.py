@@ -1,12 +1,17 @@
 from contextlib import asynccontextmanager
 import os
+import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 import services.font_manager as font_manager
 from routes import generate as generate_routes
 from routes import fonts as font_routes
+
+# Configure logging for error tracking
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -42,6 +47,20 @@ app.add_middleware(
 
 app.include_router(generate_routes.router, prefix="/api")
 app.include_router(font_routes.router, prefix="/api")
+
+
+# Global exception handler to prevent stack trace leakage
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+	"""Catch unhandled exceptions and return generic 500 error without leaking stack trace."""
+	logger.error(f"Unhandled exception: {exc}", exc_info=True)
+	return JSONResponse(
+		status_code=500,
+		content={
+			"error": "Internal server error",
+			"code": "SERVER_ERROR",
+		},
+	)
 
 
 @app.get("/health")
