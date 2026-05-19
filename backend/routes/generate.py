@@ -11,6 +11,7 @@ import services.spreadsheet as spreadsheet
 import services.certificate as certificate
 import services.zip_builder as zip_builder
 from limiter import limiter
+import quota
 
 
 router = fastapi.APIRouter()
@@ -193,21 +194,43 @@ async def generate(
 		text_align_clean = "center"
 
 	certificates = []
-	for n in names:
-		out = certificate.generate_certificate(
-			template_bytes,
-			n,
-			x_pct,
-			y_pct,
-			font_name,
-			font_size,
-			font_color_hex,
-			output_format,
-			bold_flag,
-			italic_flag,
-			text_align_clean,
-		)
-		certificates.append({"name": n, "jpeg": out.get("jpeg"), "pdf": out.get("pdf")})
+	# Enforce per-key daily quota (if API key present)
+	api_key = None
+	try:
+		api_key = request.headers.get("X-API-Key")
+	except Exception:
+		api_key = None
+	num_names = len(names)
+	if api_key:
+		if not quota.reserve(api_key, num_names):
+			return fastapi.responses.JSONResponse(
+				status_code=403,
+				content={"error": f"Per-key daily quota exceeded ({quota.get_usage(api_key)}/{quota.PER_KEY_CERTS_PER_DAY})", "code": "PER_KEY_QUOTA_EXCEEDED"},
+			)
+	try:
+		for n in names:
+			out = certificate.generate_certificate(
+				template_bytes,
+				n,
+				x_pct,
+				y_pct,
+				font_name,
+				font_size,
+				font_color_hex,
+				output_format,
+				bold_flag,
+				italic_flag,
+				text_align_clean,
+			)
+			certificates.append({"name": n, "jpeg": out.get("jpeg"), "pdf": out.get("pdf")})
+	except Exception:
+		# On failure, release reserved quota
+		try:
+			if api_key:
+				quota.release(api_key, num_names)
+		except Exception:
+			pass
+		raise
 
 	zip_bytes = zip_builder.build_zip(certificates, output_format)
 	return fastapi.responses.StreamingResponse(

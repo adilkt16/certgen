@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
 from limiter import limiter
+from auth import verify_api_key
 import services.font_manager as font_manager
 from routes import generate as generate_routes
 from routes import fonts as font_routes
@@ -27,6 +28,20 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="CertGen API", lifespan=lifespan)
+
+
+# Simple API key middleware (checks X-API-Key for /api/* requests)
+@app.middleware("http")
+async def api_key_middleware(request: Request, call_next):
+	try:
+		await verify_api_key(request)
+	except Exception as e:
+		# verify_api_key raises HTTPException for 401; convert to JSONResponse
+		from fastapi.responses import JSONResponse
+		status_code = getattr(e, 'status_code', 401)
+		detail = getattr(e, 'detail', {'error': 'Unauthorized', 'code': 'INVALID_API_KEY'})
+		return JSONResponse(status_code=status_code, content=detail)
+	return await call_next(request)
 
 # Configure CORS from environment variable `ALLOWED_ORIGINS` (comma-separated).
 # If set to '*' the old permissive behavior is preserved; otherwise provide

@@ -33,6 +33,9 @@ const state = {
 
 window.state = state;
 window.API_BASE = API_BASE;
+// Development API key (read from localStorage to avoid editing source for local dev)
+// Read dev API key from localStorage; do NOT default to a real key.
+window.API_KEY = localStorage.getItem('certgen_api_key') || '';
 window.renderPreview = renderPreview;
 window.handleGenerate = handleGenerate;
 // Expose client-side defaults matching backend env defaults
