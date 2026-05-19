@@ -24,6 +24,20 @@ async def lifespan(app: FastAPI):
 		font_manager.download_all_fonts()
 	except Exception:
 		pass
+
+	# Enforce API key requirement in production or when explicitly requested.
+	# If REQUIRE_API_KEYS=true or ENV=production and no API_KEYS provided, fail-fast.
+	require_keys_env = os.environ.get("REQUIRE_API_KEYS", "").lower()
+	env = os.environ.get("ENV", "").lower()
+	require_keys = require_keys_env in ("1", "true", "yes") or env == "production"
+	if require_keys and not (os.environ.get("API_KEYS") or os.environ.get("API_KEY")):
+		logger.error("API_KEYS environment variable is required in production (REQUIRE_API_KEYS or ENV=production) but is not set. Exiting.")
+		raise RuntimeError("API_KEYS must be set when REQUIRE_API_KEYS=true or ENV=production")
+	
+	# Warn when running without API keys in non-production mode
+	if not (os.environ.get("API_KEYS") or os.environ.get("API_KEY")):
+		logger.warning("API_KEYS not set — running in permissive development mode.\n" \
+			"Set REQUIRE_API_KEYS=true or ENV=production and configure API_KEYS in production to enforce API keys.")
 	yield
 
 
