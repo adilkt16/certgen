@@ -5,7 +5,9 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
+from limiter import limiter
 import services.font_manager as font_manager
 from routes import generate as generate_routes
 from routes import fonts as font_routes
@@ -45,8 +47,24 @@ app.add_middleware(
 	allow_credentials=True,
 )
 
+# Add rate limiter state to app
+app.state.limiter = limiter
+
 app.include_router(generate_routes.router, prefix="/api")
 app.include_router(font_routes.router, prefix="/api")
+
+
+# Global exception handler to catch rate limit errors and other exceptions
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+	"""Handle rate limit exceeded errors with user-friendly response."""
+	return JSONResponse(
+		status_code=429,
+		content={
+			"error": "Too many requests. Please wait before trying again.",
+			"code": "RATE_LIMIT_EXCEEDED",
+		},
+	)
 
 
 # Global exception handler to prevent stack trace leakage

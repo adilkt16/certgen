@@ -3,13 +3,14 @@ import os
 import re
 import fastapi
 
-from fastapi import UploadFile
+from fastapi import UploadFile, Request
 
 from PIL import Image, UnidentifiedImageError
 
 import services.spreadsheet as spreadsheet
 import services.certificate as certificate
 import services.zip_builder as zip_builder
+from limiter import limiter
 
 
 router = fastapi.APIRouter()
@@ -41,7 +42,9 @@ async def parse_spreadsheet(spreadsheet_file: UploadFile):
 
 
 @router.post("/generate")
+@limiter.limit("10/minute")
 async def generate(
+	request: fastapi.Request,
 	template_file: UploadFile,
 	spreadsheet_file: UploadFile,
 	name_column: str = fastapi.Form(...),

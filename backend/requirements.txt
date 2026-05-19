@@ -5,3 +5,4 @@ Pillow
 img2pdf
 openpyxl
 python-dotenv
+slowapi
