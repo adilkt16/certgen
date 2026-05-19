@@ -129,6 +129,18 @@ async def generate(
 		)
 
 	names = spreadsheet.get_names(rows, name_column)
+	# Remove names that sanitize to empty strings to avoid producing an empty ZIP.
+	# If all submitted names sanitize to empty, return a clear 400/NO_VALID_NAMES error.
+	valid_names = [n for n in names if zip_builder._sanitize_name(str(n or ""))]
+	if not valid_names:
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={
+				"error": "No valid names found in the selected column",
+				"code": "NO_VALID_NAMES",
+			},
+		)
+	names = valid_names
 	max_batch = int(os.environ.get("MAX_BATCH_SIZE", "77"))
 	if len(names) > max_batch:
 		return fastapi.responses.JSONResponse(
