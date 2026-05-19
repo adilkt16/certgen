@@ -1,0 +1,45 @@
+name: Audit Python dependencies
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pip-audit:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install pip-audit
+        run: python -m pip install --upgrade pip && python -m pip install pip-audit
+
+      - name: Run pip-audit on backend requirements and fail on HIGH/CRITICAL
+        run: |
+          python -m pip_audit -r backend/requirements.txt -f json -o audit-report.json || true
+          cat audit-report.json
+          python - <<'PY'
+import json,sys
+data=json.load(open('audit-report.json'))
+deps=data.get('dependencies',[])
+def has_high(d):
+    for v in d.get('vulns',[]):
+        sev = v.get('severity','').upper()
+        if sev in ('HIGH','CRITICAL'):
+            return True
+    return False
+for d in deps:
+    if has_high(d):
+        print('High/critical vulnerability found in', d.get('name'), d.get('version'))
+        sys.exit(1)
+print('No high/critical vulnerabilities found')
+sys.exit(0)
+PY
