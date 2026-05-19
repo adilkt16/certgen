@@ -107,3 +107,21 @@ Further reading and references
 If you want, I can:
 - Scaffold a `Dockerfile` and a sample `github/workflows/ci.yml`.
 - Add a `.env.example` and a `deploy/` helper script.
+
+## Rollout & monitoring for rate-limiter proxy-trust change
+
+- Default behavior: CertGen ignores client-supplied `X-Forwarded-For` headers unless
+  `USE_PROXY_HEADERS=true` is explicitly set. This prevents IP-spoofing bypasses of
+  anonymous rate limits.
+- Recommended rollout steps:
+  1. Merge these changes and deploy to a staging environment.
+  2. Monitor the `/metrics` endpoint and application logs for `rate_limit_count` and 429 spikes.
+  3. If your deployment sits behind a trusted reverse proxy and you need client IP semantics,
+     enable `USE_PROXY_HEADERS=true` and ensure the proxy is configured to overwrite any
+     client-supplied forwarding headers.
+  4. If many legitimate users share an IP (NAT/proxy), consider temporarily increasing
+     anonymous limits or encouraging API-key usage for higher throughput.
+
+Notes:
+- This change is safe-by-default; do NOT enable `USE_PROXY_HEADERS` unless the proxy is in your trust boundary.
+- CI tests were added to validate default and proxy-enabled behaviors.

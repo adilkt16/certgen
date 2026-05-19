@@ -38,10 +38,29 @@ async def lifespan(app: FastAPI):
 	if not (os.environ.get("API_KEYS") or os.environ.get("API_KEY")):
 		logger.warning("API_KEYS not set — running in permissive development mode.\n" \
 			"Set REQUIRE_API_KEYS=true or ENV=production and configure API_KEYS in production to enforce API keys.")
+
+	# Initialize runtime counters for monitoring
+	app.state.rate_limit_count = 0
+	app.state.request_count = 0
 	yield
 
 
 app = FastAPI(title="CertGen API", lifespan=lifespan)
+
+
+# Proxy headers: only enable if operators explicitly opt in via env var.
+# Default is safe (do not trust client-supplied X-Forwarded-For).
+use_proxy_headers = os.environ.get("USE_PROXY_HEADERS", "").lower() in ("1", "true", "yes")
+if use_proxy_headers:
+	try:
+		from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+
+		app.add_middleware(ProxyHeadersMiddleware)
+		logger.info("USE_PROXY_HEADERS=true: Proxy headers trusted. Ensure the fronting proxy is configured to overwrite client-supplied headers and is in the trust boundary.")
+	except Exception:
+		logger.exception("Failed to enable ProxyHeadersMiddleware; continuing without trusting proxy headers.")
+else:
+	logger.info("USE_PROXY_HEADERS not set: ignoring X-Forwarded-For by default (safe mode).")
 
 
 # Simple API key middleware (checks X-API-Key for /api/* requests)
@@ -107,6 +126,12 @@ app.include_router(font_routes.router, prefix="/api")
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 	"""Handle rate limit exceeded errors with user-friendly response."""
+	# Increment runtime counter for monitoring
+	try:
+		request.app.state.rate_limit_count += 1
+	except Exception:
+		pass
+
 	# Optionally include a Retry-After header to help clients back off.
 	return JSONResponse(
 		status_code=429,
@@ -135,6 +160,15 @@ async def generic_exception_handler(request: Request, exc: Exception):
 @app.get("/health")
 async def health():
 	return {"status": "ok", "service": "certgen-backend"}
+
+
+@app.get("/metrics")
+async def metrics():
+	"""Expose minimal runtime metrics to assist rollout monitoring."""
+	return {
+		"rate_limit_count": getattr(app.state, "rate_limit_count", 0),
+		"request_count": getattr(app.state, "request_count", 0),
+	}
 
 
 if __name__ == "__main__":
