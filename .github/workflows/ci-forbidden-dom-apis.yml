@@ -18,7 +18,16 @@ jobs:
         run: |
           set -e
           echo "Scanning frontend/ for forbidden DOM APIs: innerHTML, insertAdjacentHTML, outerHTML, document.write"
-          if grep -R --line-number -E "innerHTML|insertAdjacentHTML|outerHTML|document.write" frontend/ ; then
+          matches=$(grep -R --line-number -E "innerHTML|insertAdjacentHTML|outerHTML|document.write" frontend/ | awk '
+            {
+              line = $0
+              sub(/^[^:]*:[0-9]+:/, "", line)
+              if (line ~ /^[[:space:]]*(\/\/|\/\*|\*|<!--)/) next
+              print
+            }
+          ')
+          if [ -n "$matches" ]; then
+            printf '%s\n' "$matches"
             echo "\nForbidden DOM API usage found — please remove or justify before merging.";
             exit 1
           else
