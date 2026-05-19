@@ -102,7 +102,8 @@ function buildFontControls(fonts){
   const cardsWrap = document.getElementById('font-cards');
   if(!cardsWrap) return;
 
-  cardsWrap.innerHTML = '';
+  // Clear existing children safely to avoid using innerHTML (prevents XSS risks)
+  while (cardsWrap.firstChild) cardsWrap.removeChild(cardsWrap.firstChild);
   fonts.forEach(font => {
     const btn = document.createElement('button');
     btn.className = 'font-card';

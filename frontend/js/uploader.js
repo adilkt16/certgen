@@ -65,7 +65,8 @@ function handleTemplateFile(file){
   };
   img.src = url;
   // Replace upload zone content with thumbnail
-  templateZone.innerHTML = '';
+  // Clear children safely instead of using innerHTML
+  while (templateZone.firstChild) templateZone.removeChild(templateZone.firstChild);
   const thumb = document.createElement('img');
   thumb.src = url;
   thumb.style.maxWidth = '160px';
@@ -122,13 +123,13 @@ function handleSpreadsheetFile(file){
         const previewRows = (json.preview || []).length;
         if(previewCountBadge) previewCountBadge.textContent = `Showing first ${previewRows} rows`;
       }catch(e){}
-      // populate select
-      columnSelect.innerHTML = '';
+      // populate select (clear options safely)
+      if(columnSelect){ columnSelect.options.length = 0; }
       json.columns.forEach(c=>{ const opt = document.createElement('option'); opt.value = c; opt.textContent = c; columnSelect.appendChild(opt); });
       columnSelect.addEventListener('change', ()=>{ window.state.nameColumn = columnSelect.value; });
       if(json.columns.length>0){ window.state.nameColumn = json.columns[0]; columnSelect.value = json.columns[0]; }
-      // preview table
-      previewTable.innerHTML = '';
+      // preview table (clear children safely)
+      while (previewTable.firstChild) previewTable.removeChild(previewTable.firstChild);
       const rows = json.preview || [];
       if(rows.length>0){
         const thead = document.createElement('thead');

@@ -1,0 +1,26 @@
+name: CI — Forbidden DOM APIs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  forbid-dom-apis:
+    name: Fail if forbidden DOM APIs are present
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan for forbidden DOM APIs
+        run: |
+          set -e
+          echo "Scanning frontend/ for forbidden DOM APIs: innerHTML, insertAdjacentHTML, outerHTML, document.write"
+          if grep -R --line-number -E "innerHTML|insertAdjacentHTML|outerHTML|document.write" frontend/ ; then
+            echo "\nForbidden DOM API usage found — please remove or justify before merging.";
+            exit 1
+          else
+            echo "No forbidden DOM API patterns found in frontend/.";
+          fi
