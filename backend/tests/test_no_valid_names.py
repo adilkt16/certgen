@@ -11,6 +11,7 @@ if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
 import main
+import uuid
 
 
 def _make_jpeg_bytes():
@@ -32,6 +33,7 @@ def test_no_valid_names_returns_400(monkeypatch):
     template_bytes = _make_jpeg_bytes()
     spreadsheet_bytes = _make_csv_bytes()
 
+    headers = {"X-API-Key": str(uuid.uuid4())}
     response = client.post(
         "/api/generate",
         files={
@@ -50,6 +52,7 @@ def test_no_valid_names_returns_400(monkeypatch):
             "italic": "false",
             "text_align": "center",
         },
+        headers=headers,
     )
 
     assert response.status_code == 400
