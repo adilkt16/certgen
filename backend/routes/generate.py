@@ -112,7 +112,7 @@ async def generate(
 		)
 
 	names = spreadsheet.get_names(rows, name_column)
-	max_batch = int(os.environ.get("MAX_BATCH_SIZE", "200"))
+	max_batch = int(os.environ.get("MAX_BATCH_SIZE", "77"))
 	if len(names) > max_batch:
 		return fastapi.responses.JSONResponse(
 			status_code=400,

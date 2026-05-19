@@ -116,7 +116,9 @@ function handleSpreadsheetFile(file){
     .then(json => {
       window.state.columns = json.columns || [];
       window.state.totalNames = json.total || 0;
-      if(window.state.totalNames > 200){ showError(`Batch limit is 200. You uploaded ${window.state.totalNames} names.`); return; }
+      // Client-side quick check: prefer configured `window.MAX_BATCH_SIZE`, fallback to 77
+      const maxBatch = (typeof window.MAX_BATCH_SIZE === 'number' && window.MAX_BATCH_SIZE) ? window.MAX_BATCH_SIZE : 77;
+      if (window.state.totalNames > maxBatch) { showError(`Batch limit is ${maxBatch}. You uploaded ${window.state.totalNames} names.`); return; }
       // update preview-count badge if present
       try{
         const previewCountBadge = document.querySelector('.preview-header .preview-badge') || document.getElementById('preview-count-badge');
