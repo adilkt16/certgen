@@ -1,8 +1,12 @@
 import os
 import urllib.request
+from urllib.parse import urlparse
+import shutil
+import tempfile
 import PIL.ImageFont
 
-FONT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fonts"))
+# Fonts directory (resolved to an absolute canonical path)
+FONT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "fonts"))
 
 SUPPORTED_FONTS = {
 	"playfair_display": {
@@ -63,31 +67,86 @@ SUPPORTED_FONTS = {
 def download_all_fonts():
 	fonts_dir = FONT_DIR
 	os.makedirs(fonts_dir, exist_ok=True)
+
+	# Allowed hostnames for font downloads to avoid redirect-to-arbitrary-host attacks
+	ALLOWED_HOSTS = {"raw.githubusercontent.com", "github.com", "githubusercontent.com", "fonts.gstatic.com", "fonts.googleapis.com"}
+
 	for key, meta in SUPPORTED_FONTS.items():
 		url = meta.get("url")
 		filename = meta.get("file", f"{key}.ttf")
+		# Ensure destination path is inside FONT_DIR
 		dest = os.path.join(fonts_dir, filename)
-		if os.path.exists(dest):
+		dest_real = os.path.realpath(dest)
+		if not dest_real.startswith(FONT_DIR + os.sep):
+			print(f"Skipped (unsafe filename): {key}")
+			continue
+
+		if os.path.exists(dest_real):
 			print(f"Ready: {key}")
 			continue
 		try:
 			if url:
-				urllib.request.urlretrieve(url, dest)
-			if os.path.exists(dest):
+				p = urlparse(url)
+				if not p.scheme or p.scheme not in ("http", "https"):
+					raise ValueError("Unsupported URL scheme")
+				# allow only known hostnames
+				host = p.netloc.lower()
+				if not any(h in host for h in ALLOWED_HOSTS):
+					raise ValueError("Host not allowed")
+				# Stream download with size cap (10 MB) and write to a temp file first
+				max_bytes = 10 * 1024 * 1024
+				with urllib.request.urlopen(url, timeout=30) as resp:
+					# Simple content-length check
+					cl = resp.getheader('Content-Length')
+					if cl:
+						try:
+							if int(cl) > max_bytes:
+								raise ValueError("Remote file too large")
+						except Exception:
+							pass
+					# write to temp file
+					fd, tmp_path = tempfile.mkstemp(dir=fonts_dir)
+					with os.fdopen(fd, 'wb') as out_f:
+						total = 0
+						chunk_size = 16 * 1024
+						while True:
+							chunk = resp.read(chunk_size)
+							if not chunk:
+								break
+							out_f.write(chunk)
+							total += len(chunk)
+							if total > max_bytes:
+								out_f.close()
+								os.remove(tmp_path)
+								raise ValueError("Downloaded file exceeds size limit")
+					# Atomic rename
+					os.replace(tmp_path, dest_real)
+					# Restrictive permissions
+					try:
+						os.chmod(dest_real, 0o644)
+					except Exception:
+						pass
+			if os.path.exists(dest_real):
 				print(f"Ready: {key}")
 			else:
 				print(f"Failed: {key}")
 		except Exception:
+			# Do not raise — missing fonts should not crash the app
 			print(f"Failed: {key}")
 			continue
 
 
 def get_font_file_path(font_name):
+	# Only allow keys from SUPPORTED_FONTS (prevents traversal via font_name)
 	meta = SUPPORTED_FONTS.get(font_name)
 	if not meta:
 		return None
 	filename = meta.get("file", f"{font_name}.ttf")
-	return os.path.join(FONT_DIR, filename)
+	# Resolve path and ensure it stays inside FONT_DIR
+	path = os.path.realpath(os.path.join(FONT_DIR, filename))
+	if not path.startswith(FONT_DIR + os.sep):
+		return None
+	return path
 
 
 def get_font(font_name, size):
