@@ -65,7 +65,7 @@ function handleTemplateFile(file){
   };
   img.src = url;
   // Replace upload zone content with thumbnail
-  // Clear children safely instead of using innerHTML
+  // Clear children safely instead of using HTML injection APIs
   while (templateZone.firstChild) templateZone.removeChild(templateZone.firstChild);
   const thumb = document.createElement('img');
   thumb.src = url;
