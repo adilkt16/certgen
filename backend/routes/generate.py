@@ -188,6 +188,16 @@ async def generate(
 			content={"error": f"Unknown font: {font_name}", "code": "INVALID_FONT_NAME"},
 		)
 
+	# Validate output_format so invalid values cannot silently produce empty ZIPs
+	if output_format not in ("jpeg", "pdf", "both"):
+		return fastapi.responses.JSONResponse(
+			status_code=400,
+			content={
+				"error": "output_format must be jpeg, pdf, or both",
+				"code": "INVALID_OUTPUT_FORMAT",
+			},
+		)
+
 	bold_flag = str(bold).strip().lower() in ("1", "true", "yes", "on")
 	italic_flag = str(italic).strip().lower() in ("1", "true", "yes", "on")
 	text_align_clean = str(text_align or "center").strip().lower()
