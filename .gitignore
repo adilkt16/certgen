@@ -39,3 +39,6 @@ Thumbs.db
 
 # Archives / generated outputs
 *.zip
+
+# Local Netlify Dev runtime
+frontend/.netlify/
