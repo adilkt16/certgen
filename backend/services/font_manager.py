@@ -151,7 +151,7 @@ def get_font_file_path(font_name):
 
 def get_font(font_name, size):
 	path = get_font_file_path(font_name)
-	if os.path.exists(path):
+	if path and os.path.exists(path):
 		try:
 			return PIL.ImageFont.truetype(path, size)
 		except Exception:
