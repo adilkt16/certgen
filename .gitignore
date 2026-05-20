@@ -42,3 +42,4 @@ Thumbs.db
 
 # Local Netlify Dev runtime
 frontend/.netlify/
+frontend/js/config.js

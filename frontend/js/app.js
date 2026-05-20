@@ -7,9 +7,8 @@ const API_BASE = (() => {
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
     return 'http://localhost:8000';
   }
-  return 'https://your-backend.railway.app';
+  return window.CERTGEN_API_BASE || '';
 })();
-// Replace the production URL above with your Railway backend URL
 
 const state = {
   templateFile: null,
@@ -35,7 +34,7 @@ window.state = state;
 window.API_BASE = API_BASE;
 // Development API key (read from localStorage to avoid editing source for local dev)
 // Read dev API key from localStorage; do NOT default to a real key.
-window.API_KEY = localStorage.getItem('certgen_api_key') || '';
+window.API_KEY = window.CERTGEN_API_KEY || localStorage.getItem('certgen_api_key') || '';
 window.renderPreview = renderPreview;
 window.handleGenerate = handleGenerate;
 // Expose client-side defaults matching backend env defaults
