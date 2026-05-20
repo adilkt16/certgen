@@ -1,11 +1,8 @@
-"""Simple API key middleware and helpers.
+"""Simple API key helpers.
 
-Behavior (hybrid):
-- In development (default) an empty `API_KEYS` env lets the app run permissively.
-- In production set `ENV=production` or `REQUIRE_API_KEYS=true` to require `API_KEYS`.
-
-This module reads keys per-request so changes to the environment take effect
-without restarting the process (useful for staged rollouts).
+Public certificate routes are intentionally left unauthenticated so the
+browser never needs to carry a secret. API keys remain available for
+server-side-only checks such as metrics or future admin endpoints.
 """
 import os
 from typing import Set
@@ -19,18 +16,15 @@ def _load_keys() -> Set[str]:
 
 
 def is_protected_path(path: str) -> bool:
-    # Protect API routes under /api/ but allow health
-    if path == "/health":
-        return False
-    return path.startswith("/api")
+    # The public frontend calls certificate generation endpoints directly.
+    # Keep this as False so no browser client needs to ship a secret key.
+    return False
 
 
 async def verify_api_key(request: Request):
     """Verify X-API-Key for protected paths.
 
-    If `REQUIRE_API_KEYS=true` or `ENV=production` and no keys are configured,
-    requests will be rejected. Otherwise an empty key set behaves permissively
-    to preserve developer ergonomics.
+    This is currently a no-op for public routes.
     """
     if not is_protected_path(request.url.path):
         return

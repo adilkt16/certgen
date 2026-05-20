@@ -20,9 +20,7 @@ function showError(msg){
     if(warnEl){ warnEl.style.display=''; warnEl.textContent = msg; return; }
   }catch(e){}
   alert(msg);
-}
-
-function showTemplateError(msg){
+  fetch(window.API_BASE + '/api/parse-spreadsheet', { method: 'POST', body: fd })
   try{
     if(templateWarning){
       templateWarning.style.display = '';

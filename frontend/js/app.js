@@ -2,12 +2,14 @@ import { renderPreview, handleGenerate } from './generator.js';
 import './uploader.js';
 import './placer.js';
 
+const DEFAULT_API_BASE = 'https://certgen-backend-qrrh.onrender.com';
+
 const API_BASE = (() => {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
     return 'http://localhost:8000';
   }
-  return window.CERTGEN_API_BASE || '';
+  return window.CERTGEN_API_BASE || DEFAULT_API_BASE;
 })();
 
 const state = {
@@ -32,9 +34,6 @@ const state = {
 
 window.state = state;
 window.API_BASE = API_BASE;
-// Development API key (read from localStorage to avoid editing source for local dev)
-// Read dev API key from localStorage; do NOT default to a real key.
-window.API_KEY = window.CERTGEN_API_KEY || localStorage.getItem('certgen_api_key') || '';
 window.renderPreview = renderPreview;
 window.handleGenerate = handleGenerate;
 // Expose client-side defaults matching backend env defaults
@@ -73,8 +72,7 @@ function normalizeFontEntry(entry){
 
 async function fetchFontManifest(){
   try{
-    const headers = window.API_KEY ? { 'X-API-Key': window.API_KEY } : {};
-    const res = await fetch(API_BASE + '/api/fonts', { headers });
+    const res = await fetch(API_BASE + '/api/fonts');
     if(!res.ok) {
       console.warn('Font manifest fetch failed:', res.status);
       return [];
@@ -136,11 +134,9 @@ async function loadFontFaces(fonts){
   const loads = fonts.map(async font => {
     const proxyUrl = API_BASE + '/api/fonts/proxy/' + encodeURIComponent(font.id);
     const publicUrl = API_BASE + '/api/fonts/' + encodeURIComponent(font.id);
-    // Try binary fetch with API key header so we can create a blob URL for FontFace
+    // Try binary fetch so we can create a blob URL for FontFace
     try{
-      const headers = {};
-      if(window.API_KEY) headers['X-API-Key'] = window.API_KEY;
-      const res = await fetch(proxyUrl, { headers });
+      const res = await fetch(proxyUrl);
       if(res && res.ok){
         const ab = await res.arrayBuffer();
         const mime = res.headers.get('content-type') || 'font/woff2';

@@ -169,9 +169,7 @@ async function handleGenerate(){
   fd.append('text_align', window.state.textAlign || 'center');
 
   try{
-    const headers = {};
-    if(window.API_KEY) headers['X-API-Key'] = window.API_KEY;
-    const res = await fetch(window.API_BASE + '/api/generate', { method:'POST', headers, body: fd });
+    const res = await fetch(window.API_BASE + '/api/generate', { method:'POST', body: fd });
     clearInterval(progressInterval);
     inner.style.width = '100%'; text.textContent = '100%';
     if(document.querySelector('.big-percent')) document.querySelector('.big-percent').textContent = '100%';
