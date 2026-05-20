@@ -28,7 +28,7 @@ python3 -m http.server 5500
 ## Environment variables (table)
 | Variable | Used by | Purpose | Default |
 | --- | --- | --- | --- |
-| `MAX_BATCH_SIZE` | backend | Maximum names per batch | `200` |
+| `MAX_BATCH_SIZE` | backend | Maximum names per batch | `77` |
 | `FONTS_DIR` | backend | Folder used for downloaded fonts | `./fonts` |
 | `MAX_TEMPLATE_SIZE_MB` | backend | Template upload size limit | `10` |
 | `ALLOWED_ORIGINS` | backend | CORS origin allow list | `*` |
