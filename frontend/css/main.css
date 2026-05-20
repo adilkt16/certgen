@@ -549,6 +549,20 @@ button, input, select, textarea {
 	background: rgba(242, 202, 80, 0.12);
 }
 
+.btn.secondary {
+	background: transparent;
+	color: var(--gold);
+	border-color: var(--gold);
+	font-size: 11px;
+	padding: 8px 16px;
+}
+
+.btn.secondary:hover {
+	background: rgba(242, 202, 80, 0.15);
+	color: var(--gold-ink);
+	border-color: var(--gold);
+}
+
 .app-shell {
 	padding: 80px 0 120px;
 	border-top: 1px solid rgba(77, 70, 53, 0.4);

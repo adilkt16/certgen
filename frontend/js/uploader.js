@@ -188,4 +188,37 @@ spreadsheetZone.addEventListener('dragover', (e)=>{ e.preventDefault(); spreadsh
 spreadsheetZone.addEventListener('dragleave', ()=> spreadsheetZone.classList.remove('dragover'));
 spreadsheetZone.addEventListener('drop', (e)=>{ e.preventDefault(); spreadsheetZone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; handleSpreadsheetFile(f); });
 
+// Sample file loader
+async function loadSampleFile() {
+  const btn = document.getElementById('try-sample-btn');
+  if (!btn) return;
+  
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  
+  try {
+    const response = await fetch('./assets/certgen_sample.xlsx');
+    if (!response.ok) {
+      showError('Could not load sample file. Please upload your own file.');
+      return;
+    }
+    
+    const blob = await response.blob();
+    const file = new File([blob], 'certgen_sample.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    handleSpreadsheetFile(file);
+  } catch (err) {
+    showError('Could not load sample file. Please upload your own file.');
+    console.error('Sample file load error:', err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+const sampleBtn = document.getElementById('try-sample-btn');
+if (sampleBtn) {
+  sampleBtn.addEventListener('click', loadSampleFile);
+}
+
 export { handleTemplateFile, handleSpreadsheetFile };
