@@ -163,8 +163,19 @@ async def health():
 
 
 @app.get("/metrics")
-async def metrics():
-	"""Expose minimal runtime metrics to assist rollout monitoring."""
+async def metrics(request: Request):
+	"""Expose minimal runtime metrics to assist rollout monitoring.
+
+	If API keys are configured, require a valid `X-API-Key` header for access.
+	"""
+	from auth import _load_keys
+
+	valid_keys = _load_keys()
+	if valid_keys:
+		key = request.headers.get("X-API-Key", "")
+		if key not in valid_keys:
+			return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+
 	return {
 		"rate_limit_count": getattr(app.state, "rate_limit_count", 0),
 		"request_count": getattr(app.state, "request_count", 0),
