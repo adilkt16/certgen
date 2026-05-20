@@ -32,7 +32,7 @@ python3 -m http.server 5500
 | `FONTS_DIR` | backend | Folder used for downloaded fonts | `./fonts` |
 | `MAX_TEMPLATE_SIZE_MB` | backend | Template upload size limit | `10` |
 | `ALLOWED_ORIGINS` | backend | CORS origin allow list | `*` |
-| `API_BASE` | frontend | Backend base URL for fetch requests | `https://your-backend.railway.app` |
+| `API_BASE` | frontend | Backend base URL for fetch requests | `https://certgen-backend-qrrh.onrender.com/` |
 | `REQUIRE_API_KEYS` | backend | When `true` require `API_KEYS` at startup (production) | `` |
 
 Note: For production deployments set `ENV=production` or `REQUIRE_API_KEYS=true` and ensure `API_KEYS` is configured in your environment before the service starts. Running without `API_KEYS` leaves the backend permissive and should only be used for local development.
