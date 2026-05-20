@@ -94,7 +94,9 @@ function handleSpreadsheetFile(file){
 
   const fd = new FormData();
   fd.append('spreadsheet_file', file);
-  fetch(window.API_BASE + '/api/parse-spreadsheet', { method:'POST', body: fd })
+  const spHeaders = {};
+  if (window.API_KEY) spHeaders['X-API-Key'] = window.API_KEY;
+  fetch(window.API_BASE + '/api/parse-spreadsheet', { method: 'POST', headers: spHeaders, body: fd })
     .then(async res => {
       if(!res.ok){
         // try to surface a helpful server-provided message
