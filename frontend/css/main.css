@@ -1186,6 +1186,21 @@ select:focus, input:focus {
 
 .hero-status { color: var(--text-muted); font-size: 13px; }
 
+.traffic-warning {
+	margin-top: 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 999px;
+	background: rgba(242, 202, 80, 0.12);
+	border: 1px solid rgba(242, 202, 80, 0.28);
+	color: var(--gold);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
 .progress { margin-top: 16px; }
 
 .progress-outer {

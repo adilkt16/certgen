@@ -116,6 +116,7 @@ function renderPreview(){
 }
 
 let progressInterval = null;
+let slowProgressTimeout = null;
 
 async function handleGenerate(){
   if(!window.state.templateFile){ window.showAppError('Please upload a template'); return; }
@@ -134,14 +135,47 @@ async function handleGenerate(){
   const bigPercent = document.querySelector('.big-percent'); if(bigPercent) bigPercent.textContent = '0%';
   const filesCount = document.getElementById('files-count'); if(filesCount) filesCount.textContent = window.state.totalNames || 0;
   const etaEl = document.getElementById('eta'); if(etaEl) etaEl.textContent = 'Estimating…';
+  const trafficWarning = document.getElementById('traffic-warning');
+  if(trafficWarning) trafficWarning.style.display = 'none';
+
+  const clearSlowProgress = ()=>{
+    if(slowProgressTimeout){
+      clearTimeout(slowProgressTimeout);
+      slowProgressTimeout = null;
+    }
+  };
+
+  const scheduleSlowProgress = ()=>{
+    clearSlowProgress();
+    if(pct >= 100) return;
+    const delay = 6000 + Math.random() * 2000;
+    slowProgressTimeout = setTimeout(()=>{
+      slowProgressTimeout = null;
+      if(pct < 100){
+        pct = Math.min(99, pct + 1);
+        inner.style.width = pct + '%';
+        text.textContent = Math.round(pct) + '%';
+        if(document.querySelector('.big-percent')) document.querySelector('.big-percent').textContent = Math.round(pct) + '%';
+        if(trafficWarning) trafficWarning.style.display = pct >= 90 ? 'inline-flex' : 'none';
+        scheduleSlowProgress();
+      }
+    }, delay);
+  };
 
   const estimatedSeconds = Math.max(2, window.state.totalNames * 0.3);
   let pct = 0;
   const startTime = Date.now();
   progressInterval = setInterval(()=>{
-    pct = Math.min(90, pct + Math.random()*5);
+    if(pct < 90){
+      pct = Math.min(90, pct + Math.random()*5);
+      if(pct >= 90){
+        pct = 90;
+        scheduleSlowProgress();
+      }
+    }
     inner.style.width = pct + '%'; text.textContent = Math.round(pct) + '%';
     if(document.querySelector('.big-percent')) document.querySelector('.big-percent').textContent = Math.round(pct) + '%';
+    if(trafficWarning) trafficWarning.style.display = pct >= 90 ? 'inline-flex' : 'none';
     // naive ETA estimate: remaining percent / progress rate
     const etaEl2 = document.getElementById('eta');
     if(etaEl2){
@@ -171,10 +205,12 @@ async function handleGenerate(){
   try{
     const res = await fetch(window.API_BASE + '/api/generate', { method:'POST', body: fd });
     clearInterval(progressInterval);
+    clearSlowProgress();
     inner.style.width = '100%'; text.textContent = '100%';
     if(document.querySelector('.big-percent')) document.querySelector('.big-percent').textContent = '100%';
-    const etaEl3 = document.getElementById('eta'); if(etaEl3) etaEl3.textContent = 'Done';
+    if(trafficWarning) trafficWarning.style.display = 'none';
     if(res.ok){
+      const etaEl3 = document.getElementById('eta'); if(etaEl3) etaEl3.textContent = 'Generating your download…';
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const resultArea = document.getElementById('result-area');
@@ -183,14 +219,18 @@ async function handleGenerate(){
       downloadBtn.onclick = ()=>{ const a = document.createElement('a'); a.href = url; a.download = 'certificates.zip'; document.body.appendChild(a); a.click(); a.remove(); };
       const success = resultArea.querySelector('.success');
       success.textContent = `${window.state.totalNames} certificates generated`;
+      if(etaEl3) etaEl3.textContent = 'Ready';
     } else {
       const err = await res.json().catch(()=>({error:'Unknown error'}));
       window.showAppError(err.error || 'Generation failed');
+      if(trafficWarning) trafficWarning.style.display = 'none';
       progressWrap.style.display = 'none';
     }
   }catch(e){
     clearInterval(progressInterval);
+    clearSlowProgress();
     window.showAppError('Generation request failed');
+    if(trafficWarning) trafficWarning.style.display = 'none';
     progressWrap.style.display = 'none';
   }
 }
