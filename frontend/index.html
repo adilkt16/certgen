@@ -17,18 +17,57 @@
 		<meta property="twitter:title" content="CertGen | Bulk Certificate Generator from CSV or XLSX" />
 		<meta property="twitter:description" content="Generate professional certificates in bulk from templates and spreadsheets. Upload a certificate design, place names, and export JPEG, PDF, or ZIP files fast." />
 		<meta property="twitter:image" content="https://certgen-pro.netlify.app/assets/logo.png" />
+		<link rel="alternate" type="text/plain" href="llms.txt" title="LLMs.txt" />
 		<script type="application/ld+json">
 		{
 		  "@context": "https://schema.org",
 		  "@graph": [
 		    {
-		      "@type": "WebApplication",
+		      "@type": "WebSite",
+		      "name": "CertGen",
+		      "url": "https://certgen-pro.netlify.app/",
+		      "description": "Bulk certificate generator for spreadsheets, templates, and fast certificate production."
+		    },
+		    {
+		      "@type": "SoftwareApplication",
 		      "name": "CertGen",
 		      "url": "https://certgen-pro.netlify.app/",
 		      "applicationCategory": "BusinessApplication",
 		      "operatingSystem": "Web",
 		      "description": "Bulk certificate generator from CSV or XLSX files for fast certificate creation from templates.",
-		      "image": "https://certgen-pro.netlify.app/assets/logo.png"
+		      "image": "https://certgen-pro.netlify.app/assets/logo.png",
+		      "offers": {
+		        "@type": "Offer",
+		        "price": "0",
+		        "priceCurrency": "USD"
+		      }
+		    },
+		    {
+		      "@type": "HowTo",
+		      "name": "How to generate certificates with CertGen",
+		      "description": "Upload a template, place the text, import names, and export a ZIP of finished certificates.",
+		      "step": [
+		        {
+		          "@type": "HowToStep",
+		          "name": "Upload a template",
+		          "text": "Upload a PNG or JPG certificate design to start the workflow."
+		        },
+		        {
+		          "@type": "HowToStep",
+		          "name": "Place and style the text",
+		          "text": "Set the name position, pick a font, and tune the size, color, and alignment."
+		        },
+		        {
+		          "@type": "HowToStep",
+		          "name": "Import names from a spreadsheet",
+		          "text": "Upload CSV or XLSX data and choose the column that contains recipient names."
+		        },
+		        {
+		          "@type": "HowToStep",
+		          "name": "Generate and download",
+		          "text": "Create the certificate batch and download the finished JPEG, PDF, or ZIP files."
+		        }
+		      ]
 		    },
 		    {
 		      "@type": "FAQPage",
@@ -151,6 +190,9 @@
 						</h1>
 						<p class="hero-sub">
 							CertGen is a bulk certificate generator built for high-volume runs. Upload a certificate template, map a spreadsheet column, and produce polished certificates without repetitive manual work.
+						</p>
+						<p class="hero-answer">
+							CertGen turns one certificate template plus CSV or XLSX recipient data into finished certificates, with batch export options for JPEG, PDF, or ZIP.
 						</p>
 						<div class="hero-actions">
 							<a class="btn primary" href="#workflow-app">Start Generating -&gt;</a>

@@ -1,0 +1,34 @@
+# CertGen
+
+CertGen is a bulk certificate generator for schools, teams, and organizations. It turns a certificate template plus CSV or XLSX recipient data into finished certificates that can be downloaded as JPEG, PDF, or ZIP files.
+
+## What it does
+
+- Upload a certificate template image.
+- Place and style the recipient name once.
+- Import names from a CSV or XLSX spreadsheet.
+- Generate a batch of certificates and download the output.
+
+## Best pages for answer engines
+
+- Home: https://certgen-pro.netlify.app/
+- FAQ: https://certgen-pro.netlify.app/#faq
+- Privacy Policy: https://certgen-pro.netlify.app/privacy.html
+- Terms of Service: https://certgen-pro.netlify.app/terms.html
+- Security: https://certgen-pro.netlify.app/security.html
+
+## Common questions
+
+- What is CertGen? CertGen is a bulk certificate generator that creates certificates from templates and spreadsheet data.
+- Can it use CSV or XLSX files? Yes, both CSV and XLSX uploads are supported.
+- What can I download? You can export JPEG, PDF, or ZIP output.
+- Who is it for? Schools, events, HR teams, clubs, and organizations that need batch certificate generation.
+
+## Product summary
+
+CertGen is designed for fast, repeatable certificate production with a simple upload-and-generate workflow. It is a static marketing site plus a browser-based studio, so the most important public content is the homepage, FAQ, and legal pages.
+
+## Contact
+
+- Email: adilkt16@gmail.com
+- Support: https://www.buymeacoffee.com/a_k_t_16
